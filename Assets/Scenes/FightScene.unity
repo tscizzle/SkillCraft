@@ -280,7 +280,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &112111911
 MonoBehaviour:
@@ -563,6 +563,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 682987413059d95f3b2330c78c2ff017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 0
+  fighterId: 0
 --- !u!1001 &326407382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1707,6 +1709,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 682987413059d95f3b2330c78c2ff017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 1
+  fighterId: 0
 --- !u!1001 &1441960217
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2495,7 +2499,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1811276035
 MonoBehaviour:

@@ -5,28 +5,30 @@ using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
-    // State.
-    private int maxHealth = 100;
-    private int currentHealth = 80;
-
-    // GameObjects.
-    public GameObject fighterObj;
+    // References.
+    FightState fightState;
+    public GameObject fighterObj;  // set when instantiating prefab
+    public int fighterId;
     private GameObject currentHealthObj;
     private GameObject healthTextObj;
 
     void Awake()
     {
+        fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
         currentHealthObj = transform.Find("MaxHealth/CurrentHealth").gameObject;
         healthTextObj = transform.Find("HealthText").gameObject;
     }
 
     void Start()
     {
-
+        fighterId = fighterObj.GetComponent<Fighter>().fighterId;
     }
 
     void Update()
     {
+        int currentHealth = fightState.fighters[fighterId].currentHealth;
+        int maxHealth = fightState.fighters[fighterId].maxHealth;
+
         /* Position the health bar near the fighter. */
         Vector3 fighterPosition = fighterObj.transform.position;
         fighterPosition.y += 2;  // Use the top of the figher.

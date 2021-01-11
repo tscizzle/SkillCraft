@@ -17,6 +17,7 @@ public class PrefabInstantiator : MonoBehaviour
         // Since there should only be 1 PrefabInstantiator instance, assign this
         // instance to a global var.
         P = this;
+
         canvasObj = GameObject.Find("Canvas");
     }
 
