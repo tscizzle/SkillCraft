@@ -39,4 +39,9 @@ public class Fighter : MonoBehaviour
     {
 
     }
+
+    void OnMouseUpAsButton()
+    {
+        // TODO: if a skill was selected and it targets a fighter, apply the skill
+    }
 }

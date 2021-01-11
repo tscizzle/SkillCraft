@@ -30,35 +30,35 @@ public class FightState : MonoBehaviour
     void Awake()
     {
         // Create the player state.
-        AddFighter(isPlayer: true, maxHealth: playerMaxHealth);
+        addFighter(isPlayer: true, maxHealth: playerMaxHealth);
         // TODO: starting with one enemy will not be hard-coded forever.
-        AddFighter(isPlayer: false, maxHealth: enemyMaxHealth);
+        addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
     }
 
     /* Public API. */
 
-    public int AddFighter(bool isPlayer, int maxHealth)
+    public int addFighter(bool isPlayer, int maxHealth)
     /* Add a fighter (player or enemy) to the fight, with full health. */
     {
-        // Identify each fighter with a unique id.
         int newFighterId = previousFighterId + 1;
 
-        // Create the new fighter.
         FighterState newFighter = new FighterState(newFighterId, isPlayer, maxHealth);
 
-        // Store the fighter.
         fighters[newFighterId] = newFighter;
-
-        // If this is the player, store the id for convenient access.
         if (isPlayer)
         {
             playerFighterId = newFighterId;
         }
 
-        // Remember the id just used.
         previousFighterId = newFighterId;
 
         return newFighterId;
+    }
+
+    public void setFighterHealth(int fighterId, int health)
+    /* Set a fighter's current health, as in when damaged or healed. */
+    {
+        fighters[fighterId].setHealth(health);
     }
 }
 
@@ -79,5 +79,13 @@ public class FighterState
         isPlayer = isPlayerArg;
         maxHealth = startingMaxHealth;
         currentHealth = maxHealth;
+    }
+
+    /* Public API. */
+
+    public void setHealth(int health)
+    /* Set the current health, as in when damaged or healed. */
+    {
+        currentHealth = health;
     }
 }

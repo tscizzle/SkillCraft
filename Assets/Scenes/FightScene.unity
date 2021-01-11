@@ -529,6 +529,7 @@ GameObject:
   m_Component:
   - component: {fileID: 205075018}
   - component: {fileID: 205075019}
+  - component: {fileID: 205075020}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -565,6 +566,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayer: 0
   fighterId: 0
+--- !u!136 &205075020
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205075017}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &326407382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1675,6 +1690,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1337652701}
   - component: {fileID: 1337652702}
+  - component: {fileID: 1337652703}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1711,6 +1727,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayer: 1
   fighterId: 0
+--- !u!136 &1337652703
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337652700}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &1441960217
 PrefabInstance:
   m_ObjectHideFlags: 0
