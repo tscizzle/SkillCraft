@@ -10,13 +10,13 @@ public class SkillButton : MonoBehaviour
     /* PUBLIC API. */
 
     public Sprite getIconByName(string iconName)
-    /* Given a string name of an icon, get the Texture2D object for that icon from the
+    /* Given a string name of an icon, get the Sprite object for that icon from the
     list of options stored on this prefab.
 
-    :param string iconName: the name of the Texture2D as displayed in the Inspector,
+    :param string iconName: the name of the Sprite as displayed in the Inspector,
         like "icon_14"
     
-    :return Texture2D icon:
+    :return Sprite icon:
     */
     {
         foreach (Sprite icon in iconOptions)

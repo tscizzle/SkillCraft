@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PrefabInstantiator : MonoBehaviour
 {
@@ -38,9 +39,14 @@ public class PrefabInstantiator : MonoBehaviour
             skillButtonPrefab, Vector3.zero, Quaternion.identity
         );
 
-        // TODO: go into the SkillImage object, into the Image component, make the
-        // source image based on skill.iconTexture or whatever.
+        // Set the icon.
+        SkillButton skillButton = skillButtonObj.GetComponent<SkillButton>();
+        Sprite skillIcon = skillButton.getIconByName(skill.iconName);
+        GameObject skillImageObj =
+            skillButtonObj.transform.Find("SkillImage").gameObject;
+        skillImageObj.GetComponent<Image>().sprite = skillIcon;
 
+        // Put the button inside the row at the bottom for skills.
         skillButtonObj.transform.SetParent(skillButtonRowObj.transform);
 
         return skillButtonObj;

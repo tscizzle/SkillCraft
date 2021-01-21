@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SkillButtonRow : MonoBehaviour
 {
@@ -30,12 +29,6 @@ public class SkillButtonRow : MonoBehaviour
             float posX = leftMostX + skillIdx * width;
             skillRect.offsetMin = new Vector2(posX, 0);
             skillRect.offsetMax = new Vector2(posX + width, 0);
-            // Set the skill icon.
-            SkillButton skillButton = skillButtonObj.GetComponent<SkillButton>();
-            Sprite skillIcon = skillButton.getIconByName(skill.iconName);
-            GameObject skillImageObj =
-                skillButtonObj.transform.Find("SkillImage").gameObject;
-            skillImageObj.GetComponent<Image>().sprite = skillIcon;
 
             skillIdx += 1;
         }
