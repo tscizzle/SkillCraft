@@ -8,8 +8,12 @@ public class PrefabInstantiator : MonoBehaviour
     // PrefabInstantiator.
     public static PrefabInstantiator P;
 
-    public GameObject canvasObj;
+    /* Misc references. */
+    private GameObject canvasObj;
+    private GameObject skillButtonRowObj;
 
+    /* Prefab references. */
+    public GameObject skillButtonPrefab;
     public GameObject healthBarPrefab;
 
     void Awake()
@@ -19,14 +23,33 @@ public class PrefabInstantiator : MonoBehaviour
         P = this;
 
         canvasObj = GameObject.Find("Canvas");
+        skillButtonRowObj = GameObject.Find("SkillButtonRow");
     }
 
     /* PUBLIC API */
 
+    public GameObject CreateSkillButton(SkillState skill)
+    /* Create a SkillButton in the row at the bottom of the screen.
+    
+    :returns GameObject skillButtonObj:
+    */
+    {
+        GameObject skillButtonObj = Instantiate(
+            skillButtonPrefab, Vector3.zero, Quaternion.identity
+        );
+
+        // TODO: go into the SkillImage object, into the Image component, make the
+        // source image based on skill.iconTexture or whatever.
+
+        skillButtonObj.transform.SetParent(skillButtonRowObj.transform);
+
+        return skillButtonObj;
+    }
+
     public GameObject CreateHealthBar(GameObject fighterObj)
     /* Create a HealthBar for a Fighter.
 
-    :param GameObject fighterObj:
+    :param GameObject fighterObj: Fighter this health bar is for.
     
     :returns GameObject healthBarObj:
     */

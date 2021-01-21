@@ -8,12 +8,11 @@ public class FightState : MonoBehaviour
     displayed.
 */
 {
-    // TODO: these will not be hard-coded forever.
+    // TODO: these hard-codeds will be replaced eventually.
     static int playerMaxHealth = 100;
     static int enemyMaxHealth = 250;
 
     /* State. */
-    private int previousFighterId = -1;
     public Dictionary<int, FighterState> fighters = new Dictionary<int, FighterState>();
     private int playerFighterId;
     public FighterState player { get { return fighters[playerFighterId]; } }
@@ -26,13 +25,26 @@ public class FightState : MonoBehaviour
                 .ToDictionary(p => p.Key, p => p.Value);
         }
     }
+    private int currentTurnFighterId;
+    public FighterState currentFighter
+    {
+        get { return fighters[currentTurnFighterId]; }
+    }
 
     void Awake()
     {
-        // Create the player state.
+        // Create the player.
         addFighter(isPlayer: true, maxHealth: playerMaxHealth);
-        // TODO: starting with one enemy will not be hard-coded forever.
+        player.addSkill(new SkillState("Fireball", "icon_69"));
+        player.addSkill(new SkillState("Punch", "icon_126"));
+
+        // Create the enemies.
         addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
+        FighterState enemy = enemies.ToList()[0].Value;
+        enemy.addSkill(new SkillState("Punch", "icon_126"));
+
+        // Start the fight on the player's turn.
+        currentTurnFighterId = playerFighterId;
     }
 
     /* Public API. */
@@ -40,19 +52,16 @@ public class FightState : MonoBehaviour
     public int addFighter(bool isPlayer, int maxHealth)
     /* Add a fighter (player or enemy) to the fight, with full health. */
     {
-        int newFighterId = previousFighterId + 1;
+        FighterState newFighter = new FighterState(isPlayer, maxHealth);
 
-        FighterState newFighter = new FighterState(newFighterId, isPlayer, maxHealth);
+        fighters[newFighter.fighterId] = newFighter;
 
-        fighters[newFighterId] = newFighter;
         if (isPlayer)
         {
-            playerFighterId = newFighterId;
+            playerFighterId = newFighter.fighterId;
         }
 
-        previousFighterId = newFighterId;
-
-        return newFighterId;
+        return newFighter.fighterId;
     }
 
     public void setFighterHealth(int fighterId, int health)
@@ -64,21 +73,32 @@ public class FightState : MonoBehaviour
 
 public class FighterState
 {
+    /* Class-wide state. */
+    static private int previousFighterId = 0;
+
     /* Parameters. */
     public int fighterId;
     public bool isPlayer;
     public bool isEnemy { get { return !isPlayer; } }
+    public Dictionary<int, SkillState> skills;
 
     /* State. */
     public int maxHealth;
     public int currentHealth;
 
-    public FighterState(int fighterIdArg, bool isPlayerArg, int startingMaxHealth)
+    public FighterState(
+        bool isPlayerArg,
+        int startingMaxHealth,
+        Dictionary<int, SkillState> skillsArg = null
+    )
     {
-        fighterId = fighterIdArg;
+        fighterId = previousFighterId + 1;
         isPlayer = isPlayerArg;
         maxHealth = startingMaxHealth;
         currentHealth = maxHealth;
+        skills = skillsArg != null ? skillsArg : new Dictionary<int, SkillState>();
+
+        previousFighterId = fighterId;
     }
 
     /* Public API. */
@@ -87,5 +107,31 @@ public class FighterState
     /* Set the current health, as in when damaged or healed. */
     {
         currentHealth = health;
+    }
+
+    public void addSkill(SkillState skill)
+    /* Add a skill to a fighter. */
+    {
+        skills[skill.skillId] = skill;
+    }
+}
+
+public class SkillState
+{
+    /* Class-wide state. */
+    static private int previousSkillId = 0;
+
+    /* Parameters */
+    public int skillId;
+    public string name;
+    public string iconName;
+
+    public SkillState(string nameArg, string iconNameArg)
+    {
+        skillId = previousSkillId + 1;
+        name = nameArg;
+        iconName = iconNameArg;
+
+        previousSkillId = skillId;
     }
 }
