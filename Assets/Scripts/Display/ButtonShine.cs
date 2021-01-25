@@ -11,32 +11,38 @@ public class ButtonShine : MonoBehaviour
     /* Parameters. */
     public float offset;
     public float duration;
-    public float minDelay;
-    public float maxDelay;
+    public float repeatDelay;
 
     /* State. */
-    private Tween currentTween;
+    private Tween currentTween = null;
 
-    void Start()
+    /* PUBLIC API */
+
+    public void animate(float delay = 0)
+    /* Start (or restart if it's already going) the shiny animation.
+    
+    The first loop begins after `delay` seconds, but the loop repeats are spaced out
+    based on the `repeatDelay` variable.
+    */
     {
-        animate();
-    }
+        // If there already is one going, end it.
+        if (currentTween != null && currentTween.IsActive())
+        {
+            currentTween.Kill();
+        }
 
-    Tween animate()
-    {
-        if (currentTween)
+        // Move back to beginning position.
+        shine.DOLocalMoveY(-offset, 0);
 
-            // Move back to beginning position.
-            shine.DOLocalMoveY(-offset, 0);
-
+        // Run the animation.
         currentTween = shine
             .DOLocalMoveY(offset, duration)
             .SetEase(Ease.Linear)
-            .SetDelay(Random.Range(minDelay, maxDelay))
+            .SetDelay(delay)
             .OnComplete(() =>
             {
                 // Start the animation again.
-                animate();
+                animate(delay: repeatDelay);
             });
     }
 }

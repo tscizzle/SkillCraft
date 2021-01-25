@@ -307,8 +307,7 @@ MonoBehaviour:
   shine: {fileID: 3454751674565536413}
   offset: -60
   duration: 1
-  minDelay: 0.8
-  maxDelay: 0.8
+  repeatDelay: 1
 --- !u!1 &8088694171399121465
 GameObject:
   m_ObjectHideFlags: 0

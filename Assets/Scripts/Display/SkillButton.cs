@@ -15,7 +15,10 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
     public SkillState skill;
     private GameObject buttonBackgroundObj;
     private GameObject skillImageObj;
-    private GameObject buttonShineObj;
+    private ButtonShine buttonShine;
+
+    /* State. */
+    private bool previousIsThisSkillCued = false;
 
     void Awake()
     {
@@ -23,7 +26,8 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
 
         buttonBackgroundObj = transform.Find("ButtonBackground").gameObject;
         skillImageObj = transform.Find("SkillImage").gameObject;
-        buttonShineObj = transform.Find("ButtonBackground/ButtonShine").gameObject;
+        buttonShine =
+            transform.Find("ButtonBackground/ButtonShine").GetComponent<ButtonShine>();
     }
 
     void Start()
@@ -40,8 +44,15 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
         bool isAnySkillCued = fightState.cuedSkillId != -1;
         bool isThisSkillCued = fightState.cuedSkillId == skill.skillId;
 
-        /* Toggle background border based on if this skill is cued. */
+        // Set the background to visible when this skill is the cued skill.
         buttonBackgroundObj.SetActive(isThisSkillCued);
+        // If the this skill just recently became the cued skill, start the shiny
+        // animation on the background.
+        if (isThisSkillCued && !previousIsThisSkillCued)
+        {
+            buttonShine.animate();
+        }
+        previousIsThisSkillCued = isThisSkillCued;
     }
 
     public void OnPointerClick(PointerEventData ped)
