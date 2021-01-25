@@ -25,11 +25,14 @@ public class FightState : MonoBehaviour
                 .ToDictionary(p => p.Key, p => p.Value);
         }
     }
-    private int currentTurnFighterId;
+    private int currentTurnIdx = 0;
+    private List<int> fighterTurnOrder = new List<int>();
     public FighterState currentFighter
     {
-        get { return fighters[currentTurnFighterId]; }
+        get { return fighters[fighterTurnOrder[currentTurnIdx]]; }
     }
+    [System.NonSerialized]
+    public int cuedSkillId = -1;
 
     void Awake()
     {
@@ -37,14 +40,16 @@ public class FightState : MonoBehaviour
         addFighter(isPlayer: true, maxHealth: playerMaxHealth);
         player.addSkill(new SkillState("Fireball", "icon_69"));
         player.addSkill(new SkillState("Punch", "icon_126"));
+        player.addSkill(new SkillState("Enchanted Shield", "icon_70"));
 
         // Create the enemies.
         addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
         FighterState enemy = enemies.ToList()[0].Value;
         enemy.addSkill(new SkillState("Punch", "icon_126"));
 
-        // Start the fight on the player's turn.
-        currentTurnFighterId = playerFighterId;
+        // Set the turn order.
+        fighterTurnOrder.Add(playerFighterId);
+        fighterTurnOrder.Add(enemy.fighterId);
     }
 
     /* Public API. */

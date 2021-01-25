@@ -43,6 +43,6 @@ public class HealthBar : MonoBehaviour
         currentHealthObj.transform.localScale = new Vector3(healthPortion, 1, 1);
 
         /* Set the text of the health bar. */
-        healthTextObj.GetComponent<Text>().text = $"{currentHealth} / {maxHealth}";
+        healthTextObj.GetComponent<Text>().text = $"{currentHealth}/{maxHealth}";
     }
 }

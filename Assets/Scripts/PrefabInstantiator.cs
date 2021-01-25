@@ -39,12 +39,9 @@ public class PrefabInstantiator : MonoBehaviour
             skillButtonPrefab, Vector3.zero, Quaternion.identity
         );
 
-        // Set the icon.
+        // Associate it with the skill.
         SkillButton skillButton = skillButtonObj.GetComponent<SkillButton>();
-        Sprite skillIcon = skillButton.getIconByName(skill.iconName);
-        GameObject skillImageObj =
-            skillButtonObj.transform.Find("SkillImage").gameObject;
-        skillImageObj.GetComponent<Image>().sprite = skillIcon;
+        skillButton.skill = skill;
 
         // Put the button inside the row at the bottom for skills.
         skillButtonObj.transform.SetParent(skillButtonRowObj.transform);
