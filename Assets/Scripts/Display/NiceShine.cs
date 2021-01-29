@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class ButtonShine : MonoBehaviour
+public class NiceShine : MonoBehaviour
 {
     /* References. */
     public Transform shine;

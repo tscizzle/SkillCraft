@@ -4,15 +4,5 @@ using UnityEngine;
 
 public class EndTurnButton : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    // TODO: add an on-click which increments fightState.currentTurnIdx by 1, mod the number of fighters
 }

@@ -15,7 +15,7 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
     public SkillState skill;
     private GameObject buttonBackgroundObj;
     private GameObject skillImageObj;
-    private ButtonShine buttonShine;
+    private NiceShine buttonShine;
 
     /* State. */
     private bool previousIsThisSkillCued = false;
@@ -27,7 +27,7 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
         buttonBackgroundObj = transform.Find("ButtonBackground").gameObject;
         skillImageObj = transform.Find("SkillImage").gameObject;
         buttonShine =
-            transform.Find("ButtonBackground/ButtonShine").GetComponent<ButtonShine>();
+            transform.Find("ButtonBackground/ButtonShine").GetComponent<NiceShine>();
     }
 
     void Start()

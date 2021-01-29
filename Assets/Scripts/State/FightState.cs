@@ -33,13 +33,17 @@ public class FightState : MonoBehaviour
     }
     [System.NonSerialized]
     public int cuedSkillId = -1;
+    public SkillState cuedSkill
+    {
+        get { return cuedSkillId != -1 ? currentFighter.skills[cuedSkillId] : null; }
+    }
 
     void Awake()
     {
         // Create the player.
         addFighter(isPlayer: true, maxHealth: playerMaxHealth);
-        player.addSkill(new SkillState("Fireball", "icon_69"));
-        player.addSkill(new SkillState("Punch", "icon_126"));
+        player.addSkill(new SkillState("Fireball", "icon_69", damage: 10));
+        player.addSkill(new SkillState("Punch", "icon_126", damage: 3));
         player.addSkill(new SkillState("Enchanted Shield", "icon_70"));
 
         // Create the enemies.
@@ -69,10 +73,19 @@ public class FightState : MonoBehaviour
         return newFighter.fighterId;
     }
 
-    public void setFighterHealth(int fighterId, int health)
-    /* Set a fighter's current health, as in when damaged or healed. */
+    public void useSkill(int targetFighterId)
+    /* Apply the damage and effects of the cued skill to the targeted fighter. */
     {
-        fighters[fighterId].setHealth(health);
+        // Calculate the damage done by this skill.
+        int damage = cuedSkill.damage;
+
+        // Subtract that much health from the target, without going below 0.
+        FighterState targetFighter = fighters[targetFighterId];
+        int newHealth = Mathf.Max(0, targetFighter.currentHealth - damage);
+        targetFighter.setHealth(newHealth);
+
+        // Uncue the skill that was just used.
+        cuedSkillId = -1;
     }
 }
 
@@ -90,18 +103,19 @@ public class FighterState
     /* State. */
     public int maxHealth;
     public int currentHealth;
+    public int currentActions = 4;
 
     public FighterState(
-        bool isPlayerArg,
+        bool isPlayer,
         int startingMaxHealth,
-        Dictionary<int, SkillState> skillsArg = null
+        Dictionary<int, SkillState> skills = null
     )
     {
-        fighterId = previousFighterId + 1;
-        isPlayer = isPlayerArg;
-        maxHealth = startingMaxHealth;
-        currentHealth = maxHealth;
-        skills = skillsArg != null ? skillsArg : new Dictionary<int, SkillState>();
+        this.fighterId = previousFighterId + 1;
+        this.isPlayer = isPlayer;
+        this.maxHealth = startingMaxHealth;
+        this.currentHealth = maxHealth;
+        this.skills = skills != null ? skills : new Dictionary<int, SkillState>();
 
         previousFighterId = fighterId;
     }
@@ -128,14 +142,16 @@ public class SkillState
 
     /* Parameters */
     public int skillId;
-    public string name;
+    private string name;
     public string iconName;
+    public int damage;
 
-    public SkillState(string nameArg, string iconNameArg)
+    public SkillState(string name, string iconName, int damage = 0)
     {
-        skillId = previousSkillId + 1;
-        name = nameArg;
-        iconName = iconNameArg;
+        this.skillId = previousSkillId + 1;
+        this.name = name;
+        this.iconName = iconName;
+        this.damage = damage;
 
         previousSkillId = skillId;
     }
