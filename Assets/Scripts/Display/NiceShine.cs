@@ -19,7 +19,7 @@ public class NiceShine : MonoBehaviour
     void OnDestroy()
     {
         // Kill the ongoing animation so it doesn't error once this object is destroyed.
-        stop();
+        if (currentTween != null) currentTween.Kill();
     }
 
     /* PUBLIC API */
@@ -52,10 +52,7 @@ public class NiceShine : MonoBehaviour
     */
     {
         // Stop the animation and stop it repeating.
-        if (currentTween != null)
-        {
-            currentTween.Kill();
-        }
+        if (currentTween != null) currentTween.Kill();
         // Reset the position of the shine to not be visible.
         shine.DOLocalMoveY(-offset, 0);
     }

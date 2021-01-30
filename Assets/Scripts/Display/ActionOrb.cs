@@ -47,13 +47,9 @@ public class ActionOrb : MonoBehaviour
     {
         bool isAvailable = isActionOrbAvailable();
         if (isAvailable)
-        {
             orbShine.animate();
-        }
         else
-        {
             orbShine.stop();
-        }
         actionOrbImageObj.GetComponent<Image>().color =
             isAvailable ? new Color(1, 1, 1) : new Color(0.8f, 0.8f, 0.8f, 0.6f);
     }
