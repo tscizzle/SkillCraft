@@ -5,7 +5,8 @@ using UnityEngine;
 public class SkillButtonRow : MonoBehaviour
 {
     /* References. */
-    FightState fightState;
+    private FightState fightState;
+    private List<GameObject> skillButtonObjs = new List<GameObject>();
 
     void Awake()
     {
@@ -14,7 +15,25 @@ public class SkillButtonRow : MonoBehaviour
 
     void Start()
     {
-        // Display a SkillButton for each of the current fighter's skills.
+        updateCurrentSkillButtons();
+
+        fightState.addTurnChangeListener(updateCurrentSkillButtons);
+    }
+
+    /* PUBLIC API */
+
+    public void updateCurrentSkillButtons()
+    /* When it becomes a new fighter's turn, call this method to remove the skill
+    buttons that were displayed and show the ones for the new current fighter.
+    */
+    {
+        // Delete SkillButtons from the previous fighter's turn.
+        foreach (GameObject skillButtonObj in skillButtonObjs)
+        {
+            Destroy(skillButtonObj);
+        }
+        skillButtonObjs = new List<GameObject>();
+        // Create a SkillButton for each of the current fighter's skills.
         Dictionary<int, SkillState> currentSkills = fightState.currentFighter.skills;
         int numSkills = currentSkills.Count;
         int skillIdx = 0;
@@ -22,6 +41,7 @@ public class SkillButtonRow : MonoBehaviour
         {
             // Create the SkillButton.
             GameObject skillButtonObj = PrefabInstantiator.P.CreateSkillButton(skill);
+            skillButtonObjs.Add(skillButtonObj);
             // Position it based on SkillButton size and number of skills.
             RectTransform skillRect = skillButtonObj.GetComponent<RectTransform>();
             float width = skillRect.rect.width;
@@ -32,10 +52,5 @@ public class SkillButtonRow : MonoBehaviour
 
             skillIdx += 1;
         }
-    }
-
-    void Update()
-    {
-
     }
 }

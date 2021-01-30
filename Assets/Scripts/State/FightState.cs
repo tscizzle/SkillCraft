@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,6 +12,9 @@ public class FightState : MonoBehaviour
     // TODO: these hard-codeds will be replaced eventually.
     static int playerMaxHealth = 100;
     static int enemyMaxHealth = 250;
+
+    /* Class-wide state. */
+    static private int previousListenerId = 0;
 
     /* State. */
     public Dictionary<int, FighterState> fighters = new Dictionary<int, FighterState>();
@@ -37,6 +41,9 @@ public class FightState : MonoBehaviour
     {
         get { return cuedSkillId != -1 ? currentFighter.skills[cuedSkillId] : null; }
     }
+
+    /* Subscribers. */
+    private Dictionary<int, Action> turnChangeListeners = new Dictionary<int, Action>();
 
     void Awake()
     {
@@ -86,6 +93,49 @@ public class FightState : MonoBehaviour
 
         // Uncue the skill that was just used.
         cuedSkillId = -1;
+    }
+
+    public void goToNextFightersTurn()
+    /* Update the turn index to the next fighter, run any turn-end code for the previous
+    fighter and run any turn-start code for the next fighter.
+    */
+    {
+        // Move the turn index up 1, wrapping around to the top of the order once the
+        // end of the order is reached.
+        currentTurnIdx = (currentTurnIdx + 1) % fighterTurnOrder.Count;
+
+        foreach (Action listener in turnChangeListeners.Values)
+        {
+            listener();
+        }
+    }
+
+    /* Hooks (for display to subscribe to state change events). */
+
+    public int addTurnChangeListener(Action listener)
+    /* Register a function to run whenever the fighter turn changes. Allows display code
+    to update the display only when the relevent state changes instead of every frame.
+
+    :param Action listener: Function (no params, no return)
+
+    :return int listenerId: Key to use to unregister this listener with
+        removeTurnChangeListener.
+    */
+    {
+        int listenerId = previousListenerId + 1;
+        turnChangeListeners.Add(listenerId, listener);
+        previousListenerId = listenerId;
+        return listenerId;
+    }
+
+    public void removeTurnChangeListener(int listenerId)
+    /* Remove a previously registered listener of the fighter turn.
+    
+    :param int listenerId: Id returned when the listener was registered with
+        addTurnChangeListener.
+    */
+    {
+        turnChangeListeners.Remove(listenerId);
     }
 }
 
