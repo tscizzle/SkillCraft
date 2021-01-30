@@ -49,7 +49,9 @@ public class FightState : MonoBehaviour
     {
         // Create the player.
         addFighter(isPlayer: true, maxHealth: playerMaxHealth);
-        player.addSkill(new SkillState("Fireball", "icon_69", damage: 10));
+        player.addSkill(
+            new SkillState("Fireball", "icon_69", actionCost: 2, damage: 10)
+        );
         player.addSkill(new SkillState("Punch", "icon_126", damage: 3));
         player.addSkill(new SkillState("Enchanted Shield", "icon_70"));
 
@@ -63,10 +65,16 @@ public class FightState : MonoBehaviour
         fighterTurnOrder.Add(enemy.fighterId);
     }
 
-    /* Public API. */
+    /* PUBLIC API. */
 
     public int addFighter(bool isPlayer, int maxHealth)
-    /* Add a fighter (player or enemy) to the fight, with full health. */
+    /* Add a fighter (player or enemy) to the fight, with full health.
+    
+    :param bool isPlayer: Whether the fighter being added is the user's player or not.
+    :param int maxHealth: Max health this fighter can have.
+
+    :return int fighterId: fighterId of the created fighter.
+    */
     {
         FighterState newFighter = new FighterState(isPlayer, maxHealth);
 
@@ -81,8 +89,22 @@ public class FightState : MonoBehaviour
     }
 
     public void useSkill(int targetFighterId)
-    /* Apply the damage and effects of the cued skill to the targeted fighter. */
+    /* Check that the cued skill can be used. If it can, then apply its damage and
+    effects to the targeted fighter. If not, display to the user why not.
+
+    :param int targetFighterId: Id of the fighter to apply the skill to.
+    */
     {
+        string reason = precheckSkillUse(targetFighterId);
+        if (reason != null)
+        {
+            // TODO: display reason, like "Not enough actions."
+            return;
+        }
+
+        // Subtract the required actions for this skill from the current fighter.
+        currentFighter.currentActions -= cuedSkill.actionCost;
+
         // Calculate the damage done by this skill.
         int damage = cuedSkill.damage;
 
@@ -137,10 +159,33 @@ public class FightState : MonoBehaviour
     {
         turnChangeListeners.Remove(listenerId);
     }
+
+    /* Helpers. */
+
+    private string precheckSkillUse(int targetFighterId)
+    /* Check that the cued skill is able to be used given the current state and the
+    targeted fighter. If not, give the reason.
+    
+    :param int targetFighterId: Id of the fighter to apply the skill to.
+
+    :return string reason: If the skill can be used, return null. If it cannot, return a
+        string explaining why not.
+    */
+    {
+        if (cuedSkill.actionCost > currentFighter.currentActions)
+        {
+            return "Not enough actions.";
+        }
+
+        return null;
+    }
 }
 
 public class FighterState
 {
+    /* Constants. */
+    static private int startingActionsPerTurn = 4;
+
     /* Class-wide state. */
     static private int previousFighterId = 0;
 
@@ -153,7 +198,7 @@ public class FighterState
     /* State. */
     public int maxHealth;
     public int currentHealth;
-    public int currentActions = 4;
+    public int currentActions;
 
     public FighterState(
         bool isPlayer,
@@ -165,12 +210,13 @@ public class FighterState
         this.isPlayer = isPlayer;
         this.maxHealth = startingMaxHealth;
         this.currentHealth = maxHealth;
+        this.currentActions = startingActionsPerTurn;
         this.skills = skills != null ? skills : new Dictionary<int, SkillState>();
 
         previousFighterId = fighterId;
     }
 
-    /* Public API. */
+    /* PUBLIC API. */
 
     public void setHealth(int health)
     /* Set the current health, as in when damaged or healed. */
@@ -194,13 +240,15 @@ public class SkillState
     public int skillId;
     private string name;
     public string iconName;
+    public int actionCost;
     public int damage;
 
-    public SkillState(string name, string iconName, int damage = 0)
+    public SkillState(string name, string iconName, int actionCost = 1, int damage = 0)
     {
         this.skillId = previousSkillId + 1;
         this.name = name;
         this.iconName = iconName;
+        this.actionCost = actionCost;
         this.damage = damage;
 
         previousSkillId = skillId;
