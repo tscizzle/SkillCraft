@@ -16,6 +16,15 @@ public class NiceShine : MonoBehaviour
     /* State. */
     private Tween currentTween = null;
 
+    void OnDestroy()
+    {
+        // Kill the ongoing animation so it doesn't error once this object is destroyed.
+        if (currentTween != null)
+        {
+            currentTween.Kill();
+        }
+    }
+
     /* PUBLIC API */
 
     public void animate(float delay = 0)
