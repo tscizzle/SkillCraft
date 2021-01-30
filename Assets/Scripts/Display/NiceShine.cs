@@ -19,10 +19,7 @@ public class NiceShine : MonoBehaviour
     void OnDestroy()
     {
         // Kill the ongoing animation so it doesn't error once this object is destroyed.
-        if (currentTween != null)
-        {
-            currentTween.Kill();
-        }
+        stop();
     }
 
     /* PUBLIC API */
@@ -30,18 +27,12 @@ public class NiceShine : MonoBehaviour
     public void animate(float delay = 0)
     /* Start (or restart if it's already going) the shiny animation.
     
-    The first loop begins after `delay` seconds, but the loop repeats are spaced out
-    based on the `repeatDelay` variable.
+    :param float delay: The first loop begins after `delay` seconds, but the loop
+        repeats are spaced out based on the `repeatDelay` variable.
     */
     {
-        // If there already is one going, end it.
-        if (currentTween != null && currentTween.IsActive())
-        {
-            currentTween.Kill();
-        }
-
-        // Move back to beginning position.
-        shine.DOLocalMoveY(-offset, 0);
+        // If there already is one going, end it so we'll start a new one.
+        stop();
 
         // Run the animation.
         currentTween = shine
@@ -53,5 +44,19 @@ public class NiceShine : MonoBehaviour
                 // Start the animation again.
                 animate(delay: repeatDelay);
             });
+    }
+
+    public void stop()
+    /* Kill the current animation, stop it repeating, and reset the shine out of view.
+    Essentially removes the shine visually (like for a faded/disabled button).
+    */
+    {
+        // Stop the animation and stop it repeating.
+        if (currentTween != null)
+        {
+            currentTween.Kill();
+        }
+        // Reset the position of the shine to not be visible.
+        shine.DOLocalMoveY(-offset, 0);
     }
 }

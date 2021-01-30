@@ -42,8 +42,9 @@ public class FightState : MonoBehaviour
         get { return cuedSkillId != -1 ? currentFighter.skills[cuedSkillId] : null; }
     }
 
-    /* Subscribers. */
-    private Dictionary<int, Action> turnChangeListeners = new Dictionary<int, Action>();
+    /* State subscribers. */
+    private Dictionary<int, Action> turnListeners = new Dictionary<int, Action>();
+    private Dictionary<int, Action> actionListeners = new Dictionary<int, Action>();
 
     void Awake()
     {
@@ -63,6 +64,11 @@ public class FightState : MonoBehaviour
         // Set the turn order.
         fighterTurnOrder.Add(playerFighterId);
         fighterTurnOrder.Add(enemy.fighterId);
+    }
+
+    void Start()
+    {
+        runAllListeners();
     }
 
     /* PUBLIC API. */
@@ -115,6 +121,9 @@ public class FightState : MonoBehaviour
 
         // Uncue the skill that was just used.
         cuedSkillId = -1;
+
+        // Run action listeners.
+        foreach (Action listener in actionListeners.Values) listener();
     }
 
     public void goToNextFightersTurn()
@@ -126,38 +135,50 @@ public class FightState : MonoBehaviour
         // end of the order is reached.
         currentTurnIdx = (currentTurnIdx + 1) % fighterTurnOrder.Count;
 
-        foreach (Action listener in turnChangeListeners.Values)
-        {
-            listener();
-        }
+        // Run turn listeners.
+        foreach (Action listener in turnListeners.Values) listener();
+        // Run actions listeners.
+        foreach (Action listener in actionListeners.Values) listener();
     }
 
-    /* Hooks (for display to subscribe to state change events). */
+    /* Hooks.
 
-    public int addTurnChangeListener(Action listener)
-    /* Register a function to run whenever the fighter turn changes. Allows display code
-    to update the display only when the relevent state changes instead of every frame.
+    These allow code like display code to subscribe to state change events.
 
-    :param Action listener: Function (no params, no return)
-
-    :return int listenerId: Key to use to unregister this listener with
-        removeTurnChangeListener.
+    Each register<Something>Listener takes 1 param: an Action (which takes no params, no
+    return value) which will run when the relevant state changes, and returns an int
+    which can be used to reference that listener, for example to remove it later with
+    the corresponding remove<Something>Listener.
     */
+
+    public int addTurnListener(Action listener)
+    /*  Relevant state: `currentTurnIdx` */
     {
         int listenerId = previousListenerId + 1;
-        turnChangeListeners.Add(listenerId, listener);
+        turnListeners.Add(listenerId, listener);
         previousListenerId = listenerId;
         return listenerId;
     }
 
-    public void removeTurnChangeListener(int listenerId)
-    /* Remove a previously registered listener of the fighter turn.
-    
-    :param int listenerId: Id returned when the listener was registered with
-        addTurnChangeListener.
-    */
+    public void removeTurnListener(int listenerId)
+    /*  Relevant state: `currentTurnIdx` */
     {
-        turnChangeListeners.Remove(listenerId);
+        turnListeners.Remove(listenerId);
+    }
+
+    public int addActionListener(Action listener)
+    /*  Relevant state: `currentFighter.currentActions` */
+    {
+        int listenerId = previousListenerId + 1;
+        actionListeners.Add(listenerId, listener);
+        previousListenerId = listenerId;
+        return listenerId;
+    }
+
+    public void removeActionListener(int listenerId)
+    /*  Relevant state: `currentFighter.currentActions` */
+    {
+        actionListeners.Remove(listenerId);
     }
 
     /* Helpers. */
@@ -165,7 +186,7 @@ public class FightState : MonoBehaviour
     private string precheckSkillUse(int targetFighterId)
     /* Check that the cued skill is able to be used given the current state and the
     targeted fighter. If not, give the reason.
-    
+
     :param int targetFighterId: Id of the fighter to apply the skill to.
 
     :return string reason: If the skill can be used, return null. If it cannot, return a
@@ -178,6 +199,18 @@ public class FightState : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void runAllListeners()
+    /* For situations when we just want the whole display to update (like at the very
+    beginning), run all registered listeners, regardless of what state they are
+    subscribed to.
+    */
+    {
+        // Run turn listeners.
+        foreach (Action listener in turnListeners.Values) listener();
+        // Run actions listeners.
+        foreach (Action listener in actionListeners.Values) listener();
     }
 }
 

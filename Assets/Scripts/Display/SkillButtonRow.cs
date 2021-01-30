@@ -11,18 +11,14 @@ public class SkillButtonRow : MonoBehaviour
     void Awake()
     {
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
+
+        // Register this object to update its display when needed.
+        fightState.addTurnListener(updateCurrentSkillButtons);
     }
 
-    void Start()
-    {
-        updateCurrentSkillButtons();
+    /* Helpers. */
 
-        fightState.addTurnChangeListener(updateCurrentSkillButtons);
-    }
-
-    /* PUBLIC API */
-
-    public void updateCurrentSkillButtons()
+    private void updateCurrentSkillButtons()
     /* When it becomes a new fighter's turn, call this method to remove the skill
     buttons that were displayed and show the ones for the new current fighter.
     */

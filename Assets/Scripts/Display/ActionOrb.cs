@@ -14,9 +14,6 @@ public class ActionOrb : MonoBehaviour
     /* Parameters. */
     private int actionIdx;
 
-    /* State. */
-    private bool previousIsAvailable = false;
-
     void Awake()
     {
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
@@ -36,26 +33,30 @@ public class ActionOrb : MonoBehaviour
             }
             childIdx++;
         }
-    }
 
-    void Update()
-    {
-        // If this action orb represents an action that is available, highlight it with
-        // shine and color (though only need to if it wasn't previously).
-
-        bool isAvailable = isActionOrbAvailable();
-
-        if (isAvailable && !previousIsAvailable)
-        {
-            orbShine.animate();
-        }
-        actionOrbImageObj.GetComponent<Image>().color =
-            isAvailable ? new Color(1, 1, 1) : new Color(0.8f, 0.8f, 0.8f, 0.6f);
-
-        previousIsAvailable = isAvailable;
+        // Register this object to update its display when needed.
+        fightState.addActionListener(updateThisActionOrb);
     }
 
     /* Helpers. */
+
+    void updateThisActionOrb()
+    /* If this action orb represents an action that is available, highlight it with
+    shine and color. If not available, have it faded, and no shine.
+    */
+    {
+        bool isAvailable = isActionOrbAvailable();
+        if (isAvailable)
+        {
+            orbShine.animate();
+        }
+        else
+        {
+            orbShine.stop();
+        }
+        actionOrbImageObj.GetComponent<Image>().color =
+            isAvailable ? new Color(1, 1, 1) : new Color(0.8f, 0.8f, 0.8f, 0.6f);
+    }
 
     private bool isActionOrbAvailable()
     /* If the current fighter has N action orbs available, this method returns true if
@@ -64,4 +65,6 @@ public class ActionOrb : MonoBehaviour
     {
         return actionIdx < fightState.currentFighter.currentActions;
     }
+
+
 }
