@@ -59,11 +59,15 @@ public class FightState : MonoBehaviour
         // Create the enemies.
         addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
         FighterState enemy = enemies.ToList()[0].Value;
-        enemy.addSkill(new SkillState("Punch", "icon_126"));
+        enemy.addSkill(new SkillState("Kick", "icon_16", damage: 3));
 
         // Set the turn order.
         fighterTurnOrder.Add(playerFighterId);
         fighterTurnOrder.Add(enemy.fighterId);
+
+        // Initiate the first fighter's turn.
+        currentTurnIdx = -1;
+        goToNextFightersTurn();
     }
 
     void Start()
@@ -134,6 +138,9 @@ public class FightState : MonoBehaviour
         // Move the turn index up 1, wrapping around to the top of the order once the
         // end of the order is reached.
         currentTurnIdx = (currentTurnIdx + 1) % fighterTurnOrder.Count;
+
+        // Give the next fighter actions for this turn.
+        currentFighter.gainActionsToStartTurn();
 
         // Run turn listeners.
         foreach (Action listener in turnListeners.Values) listener();
@@ -217,7 +224,8 @@ public class FightState : MonoBehaviour
 public class FighterState
 {
     /* Constants. */
-    static private int startingActionsPerTurn = 4;
+    static private int actionsGainedPerTurn = 4;
+    static private int maxStartingActionsPerTurn = 6;
 
     /* Class-wide state. */
     static private int previousFighterId = 0;
@@ -243,7 +251,7 @@ public class FighterState
         this.isPlayer = isPlayer;
         this.maxHealth = startingMaxHealth;
         this.currentHealth = maxHealth;
-        this.currentActions = startingActionsPerTurn;
+        this.currentActions = 0;
         this.skills = skills != null ? skills : new Dictionary<int, SkillState>();
 
         previousFighterId = fighterId;
@@ -261,6 +269,17 @@ public class FighterState
     /* Add a skill to a fighter. */
     {
         skills[skill.skillId] = skill;
+    }
+
+    public void gainActionsToStartTurn()
+    /* At the start of this fighter's turn, grant the default number of actions to add
+    to any actions they have left over from the previous turn, but also upper-bound
+    their starting actions.
+    */
+    {
+        currentActions = Mathf.Min(
+            currentActions + actionsGainedPerTurn, maxStartingActionsPerTurn
+        );
     }
 }
 
