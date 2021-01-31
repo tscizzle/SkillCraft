@@ -48,22 +48,7 @@ public class FightState : MonoBehaviour
 
     void Awake()
     {
-        // Create the player.
-        addFighter(isPlayer: true, maxHealth: playerMaxHealth);
-        player.addSkill(
-            new SkillState("Fireball", "icon_69", actionCost: 2, damage: 10)
-        );
-        player.addSkill(new SkillState("Punch", "icon_126", damage: 3));
-        player.addSkill(new SkillState("Enchanted Shield", "icon_70"));
-
-        // Create the enemies.
-        addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
-        FighterState enemy = enemies.ToList()[0].Value;
-        enemy.addSkill(new SkillState("Kick", "icon_16", damage: 3));
-
-        // Set the turn order.
-        fighterTurnOrder.Add(playerFighterId);
-        fighterTurnOrder.Add(enemy.fighterId);
+        hardCodeFightersAndSkills();
 
         // Initiate the first fighter's turn.
         currentTurnIdx = -1;
@@ -201,9 +186,14 @@ public class FightState : MonoBehaviour
     */
     {
         if (cuedSkill.actionCost > currentFighter.currentActions)
-        {
             return "Not enough actions.";
-        }
+
+        bool isTargetingEnemy = currentFighter.fighterId != targetFighterId;
+        bool isTargetingSelf = currentFighter.fighterId == targetFighterId;
+        if (!cuedSkill.canTargetEnemy && isTargetingEnemy)
+            return "Cannot target enemy.";
+        else if (!cuedSkill.canTargetSelf && isTargetingSelf)
+            return "Cannot target self.";
 
         return null;
     }
@@ -218,6 +208,33 @@ public class FightState : MonoBehaviour
         foreach (Action listener in turnListeners.Values) listener();
         // Run actions listeners.
         foreach (Action listener in actionListeners.Values) listener();
+    }
+
+    private void hardCodeFightersAndSkills()
+    {
+        // Create the player.
+        addFighter(isPlayer: true, maxHealth: playerMaxHealth);
+        player.addSkill(
+            new SkillState("Fireball", "icon_69", actionCost: 2, damage: 10)
+        );
+        player.addSkill(new SkillState("Punch", "icon_126", damage: 3));
+        player.addSkill(
+            new SkillState(
+                "Enchanted Shield",
+                "icon_70",
+                canTargetEnemy: false,
+                canTargetSelf: true
+            )
+        );
+
+        // Create the enemies.
+        addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
+        FighterState enemy = enemies.ToList()[0].Value;
+        enemy.addSkill(new SkillState("Kick", "icon_16", damage: 3));
+
+        // Set the turn order.
+        fighterTurnOrder.Add(playerFighterId);
+        fighterTurnOrder.Add(enemy.fighterId);
     }
 }
 
@@ -294,14 +311,25 @@ public class SkillState
     public string iconName;
     public int actionCost;
     public int damage;
+    public bool canTargetEnemy;
+    public bool canTargetSelf;
 
-    public SkillState(string name, string iconName, int actionCost = 1, int damage = 0)
+    public SkillState(
+        string name,
+        string iconName,
+        int actionCost = 1,
+        int damage = 0,
+        bool canTargetEnemy = true,
+        bool canTargetSelf = false
+    )
     {
         this.skillId = previousSkillId + 1;
         this.name = name;
         this.iconName = iconName;
         this.actionCost = actionCost;
         this.damage = damage;
+        this.canTargetEnemy = canTargetEnemy;
+        this.canTargetSelf = canTargetSelf;
 
         previousSkillId = skillId;
     }

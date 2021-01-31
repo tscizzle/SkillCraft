@@ -39,8 +39,21 @@ public class Fighter : MonoBehaviour
 
     void Update()
     {
-        bool isAnySkillCued = fightState.cuedSkillId != -1;
-        bool doHighlightTarget = isHovered && isAnySkillCued;
+        // Highlight this fighter or not, based on the cued skill and if hovering this
+        // fighter with the mouse.
+        bool doHighlightTarget = false;
+        if (fightState.cuedSkill != null)
+        {
+            bool isThisFightersTurn = fighterId == fightState.currentFighter.fighterId;
+            bool canCuedSkillTargetThisFighter = (
+                (!isThisFightersTurn && fightState.cuedSkill.canTargetEnemy)
+                || (isThisFightersTurn && fightState.cuedSkill.canTargetSelf)
+            );
+            if (isHovered && canCuedSkillTargetThisFighter)
+            {
+                doHighlightTarget = true;
+            }
+        }
         hoverLightObj.SetActive(doHighlightTarget);
     }
 
