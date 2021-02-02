@@ -22,7 +22,18 @@ public class ActionOrb : MonoBehaviour
         actionOrbImageObj = transform.Find("OrbImage").gameObject;
         orbShine = transform.Find("OrbBackground/OrbShine").GetComponent<NiceShine>();
 
-        // Get which action orb in the row this is (i.e. set `actionIdx`).
+        setActionIdx();
+
+        // Register this object to update its display when needed.
+        fightState.addActionListener(updateThisActionOrb);
+        fightState.addCuedSkillListener(updateThisActionOrb);
+    }
+
+    /* Helpers. */
+
+    private void setActionIdx()
+    /* Save the index of this action orb based on its position in the hierarchy. */
+    {
         int childIdx = 0;
         foreach (Transform child in actionOrbRowObj.transform)
         {
@@ -33,34 +44,55 @@ public class ActionOrb : MonoBehaviour
             }
             childIdx++;
         }
-
-        // Register this object to update its display when needed.
-        fightState.addActionListener(updateThisActionOrb);
     }
 
-    /* Helpers. */
-
-    void updateThisActionOrb()
+    private void updateThisActionOrb()
     /* If this action orb represents an action that is available, highlight it with
     shine and color. If not available, have it faded, and no shine.
     */
     {
         bool isAvailable = isActionOrbAvailable();
+        bool isCuedToBeUsed = isActionOrbCuedToBeUsed();
+
         if (isAvailable)
             orbShine.animate();
         else
             orbShine.stop();
-        actionOrbImageObj.GetComponent<Image>().color =
-            isAvailable ? new Color(1, 1, 1) : new Color(0.8f, 0.8f, 0.8f, 0.6f);
+
+        Color color = new Color(1, 1, 1);
+        if (!isAvailable)
+        {
+            color.a = 0.4f;
+        }
+        else if (isCuedToBeUsed)
+        {
+            color.g = 0;
+            color.a = 0.8f;
+        }
+        actionOrbImageObj.GetComponent<Image>().color = color;
     }
 
     private bool isActionOrbAvailable()
-    /* If the current fighter has N action orbs available, this method returns true if
-        this action orb is one of the first N from left to right.
+    /* If the current fighter has N actions available, the first N action orbs from left
+    to right are displayed as available.
     */
     {
         return actionIdx < fightState.currentFighter.currentActions;
     }
 
+    private bool isActionOrbCuedToBeUsed()
+    /* If the cued skill would use N actions, the first N action orbs from right to
+    left (only including available ones) are displayed as cued to be used.
+    */
+    {
+        // No action orbs are cued to be used if no skill is cued.
+        if (fightState.cuedSkill == null)
+        {
+            return false;
+        }
 
+        int actions = fightState.currentFighter.currentActions;
+        int cost = fightState.cuedSkill.actionCost;
+        return actions - cost <= actionIdx && actionIdx < actions;
+    }
 }

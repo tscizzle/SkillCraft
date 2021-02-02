@@ -45,13 +45,14 @@ public class FightState : MonoBehaviour
     /* State subscribers. */
     private Dictionary<int, Action> turnListeners = new Dictionary<int, Action>();
     private Dictionary<int, Action> actionListeners = new Dictionary<int, Action>();
+    private Dictionary<int, Action> cuedSkillListeners = new Dictionary<int, Action>();
 
     void Awake()
     {
         hardCodeFightersAndSkills();
 
         // Initiate the first fighter's turn.
-        currentTurnIdx = -1;
+        currentTurnIdx = fighterTurnOrder.Count - 1;
         goToNextFightersTurn();
     }
 
@@ -83,36 +84,63 @@ public class FightState : MonoBehaviour
         return newFighter.fighterId;
     }
 
-    public void useSkill(int targetFighterId)
+    public void cueSkill(int skillId)
+    /* Prepare a skill to be used. This is what clicking a skill buttons does, so that
+    the user can see things like how many actions it will cost, as well as choose the
+    target to apply the skill to.
+
+    :param int skillId: Id of the skill to cue up.
+    */
+    {
+        cuedSkillId = skillId;
+
+        // Run cued skill listeners.
+        foreach (Action listener in cuedSkillListeners.Values) listener();
+    }
+
+    public void uncueSkill()
+    /* Set the cued skill back to nothing. */
+    {
+        cuedSkillId = -1;
+
+        // Run cued skill listeners.
+        foreach (Action listener in cuedSkillListeners.Values) listener();
+    }
+
+    public string useSkill(int targetFighterId)
     /* Check that the cued skill can be used. If it can, then apply its damage and
     effects to the targeted fighter. If not, display to the user why not.
 
     :param int targetFighterId: Id of the fighter to apply the skill to.
+
+    :return string reason: If the skill was used, return null. If it was not, return a
+        string explaining why not.
     */
     {
         string reason = precheckSkillUse(targetFighterId);
         if (reason != null)
         {
-            // TODO: display reason, like "Not enough actions."
-            return;
+            return reason;
         }
 
-        // Subtract the required actions for this skill from the current fighter.
+        // Use up actions.
         currentFighter.currentActions -= cuedSkill.actionCost;
 
-        // Calculate the damage done by this skill.
+        // Calculate damage.
         int damage = cuedSkill.damage;
 
-        // Subtract that much health from the target, without going below 0.
+        // Apply damage to target's shields and health.
         FighterState targetFighter = fighters[targetFighterId];
         int newHealth = Mathf.Max(0, targetFighter.currentHealth - damage);
         targetFighter.setHealth(newHealth);
 
-        // Uncue the skill that was just used.
-        cuedSkillId = -1;
+        // Uncue the used skill.
+        uncueSkill();
 
         // Run action listeners.
         foreach (Action listener in actionListeners.Values) listener();
+
+        return null;
     }
 
     public void goToNextFightersTurn()
@@ -120,6 +148,8 @@ public class FightState : MonoBehaviour
     fighter and run any turn-start code for the next fighter.
     */
     {
+        uncueSkill();
+
         // Move the turn index up 1, wrapping around to the top of the order once the
         // end of the order is reached.
         currentTurnIdx = (currentTurnIdx + 1) % fighterTurnOrder.Count;
@@ -173,6 +203,21 @@ public class FightState : MonoBehaviour
         actionListeners.Remove(listenerId);
     }
 
+    public int addCuedSkillListener(Action listener)
+    /*  Relevant state: `cuedSkill` */
+    {
+        int listenerId = previousListenerId + 1;
+        cuedSkillListeners.Add(listenerId, listener);
+        previousListenerId = listenerId;
+        return listenerId;
+    }
+
+    public void removeCuedSkillListener(int listenerId)
+    /*  Relevant state: `cuedSkill` */
+    {
+        cuedSkillListeners.Remove(listenerId);
+    }
+
     /* Helpers. */
 
     private string precheckSkillUse(int targetFighterId)
@@ -208,6 +253,8 @@ public class FightState : MonoBehaviour
         foreach (Action listener in turnListeners.Values) listener();
         // Run actions listeners.
         foreach (Action listener in actionListeners.Values) listener();
+        // Run cued skill listeners.
+        foreach (Action listener in cuedSkillListeners.Values) listener();
     }
 
     private void hardCodeFightersAndSkills()

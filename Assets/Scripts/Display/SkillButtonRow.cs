@@ -41,7 +41,7 @@ public class SkillButtonRow : MonoBehaviour
             // Position it based on SkillButton size and number of skills.
             RectTransform skillRect = skillButtonObj.GetComponent<RectTransform>();
             float width = skillRect.rect.width;
-            float leftMostX = -1 * (numSkills / 2) * width;
+            float leftMostX = -1 * (numSkills / 2) * width - (width / 2);
             float posX = leftMostX + skillIdx * width;
             skillRect.offsetMin = new Vector2(posX, 0);
             skillRect.offsetMax = new Vector2(posX + width, 0);

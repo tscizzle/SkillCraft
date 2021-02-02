@@ -68,10 +68,24 @@ public class Fighter : MonoBehaviour
     }
 
     void OnMouseUpAsButton()
+    /* When clicking a fighter, if a skill is cued, attempt to use it on that fighter.
+    If it happens
+    */
     {
         if (fightState.cuedSkill != null)
         {
-            fightState.useSkill(fighterId);
+            string failureReason = fightState.useSkill(fighterId);
+
+            // If skill failed, display the reason to the user.
+            // If it worked, give feedback like camera shake or audio clip.
+            if (failureReason != null)
+            {
+                // TODO: display reason, like "Not enough actions."
+            }
+            else
+            {
+                StartCoroutine(CameraShake.shake());
+            }
         }
     }
 }

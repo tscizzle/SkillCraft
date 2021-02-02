@@ -58,8 +58,14 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData ped)
     {
         // Toggle this skill as cued or not.
-        fightState.cuedSkillId =
-            fightState.cuedSkillId == skill.skillId ? -1 : skill.skillId;
+        if (fightState.cuedSkillId == skill.skillId)
+        {
+            fightState.uncueSkill();
+        }
+        else
+        {
+            fightState.cueSkill(skill.skillId);
+        }
     }
 
     /* PUBLIC API. */
