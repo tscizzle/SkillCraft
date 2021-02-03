@@ -47,8 +47,9 @@ public class ActionOrb : MonoBehaviour
     }
 
     private void updateThisActionOrb()
-    /* If this action orb represents an action that is available, highlight it with
-    shine and color. If not available, have it faded, and no shine.
+    /* Update the look of this action orb, based on number of actions available, which
+    orb in the order this is, and the cued skill (e.g. unavailable actions are faded,
+    actions about to be used by the cued skill are colored, etc.).
     */
     {
         bool isAvailable = isActionOrbAvailable();

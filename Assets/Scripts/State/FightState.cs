@@ -161,6 +161,8 @@ public class FightState : MonoBehaviour
         foreach (Action listener in turnListeners.Values) listener();
         // Run actions listeners.
         foreach (Action listener in actionListeners.Values) listener();
+        // Run cued skill listeners.
+        foreach (Action listener in cuedSkillListeners.Values) listener();
     }
 
     /* Hooks.
