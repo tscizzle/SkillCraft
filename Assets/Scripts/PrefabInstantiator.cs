@@ -16,6 +16,7 @@ public class PrefabInstantiator : MonoBehaviour
     /* Prefab references. */
     public GameObject skillButtonPrefab;
     public GameObject healthBarPrefab;
+    public GameObject skillInfoPrefab;
 
     void Awake()
     {
@@ -31,6 +32,8 @@ public class PrefabInstantiator : MonoBehaviour
 
     public GameObject CreateSkillButton(SkillState skill)
     /* Create a SkillButton in the row at the bottom of the screen.
+
+    :param SkillState skill: Which skill this button is for.
     
     :returns GameObject skillButtonObj:
     */
@@ -64,9 +67,32 @@ public class PrefabInstantiator : MonoBehaviour
         HealthBar healthBar = healthBarObj.GetComponent<HealthBar>();
         healthBar.fighterObj = fighterObj;
 
-        // The health bar is a UI image, so make it a child of Canvas.
+        // The health bar is a UI object, so make it a child of Canvas.
         healthBarObj.transform.SetParent(canvasObj.transform);
 
         return healthBarObj;
+    }
+
+    public GameObject CreateSkillInfo(SkillState skill, Transform parent = null)
+    /* Create a display for info about a skill (damage, actions, cooldown, etc.).
+
+    :param SkillState skill: Which skill this display is about.
+    :param Transform parent: If supplied, make this skill info a child of `parent`.
+    
+    :returns GameObject skillInfoObj:
+    */
+    {
+        GameObject skillInfoObj = Instantiate(
+            skillInfoPrefab, Vector3.zero, Quaternion.identity
+        );
+
+        SkillInfo skillInfo = skillInfoObj.GetComponent<SkillInfo>();
+        skillInfo.skill = skill;
+
+        // The skill info is a UI object, so make it a child of Canvas.
+        parent = parent != null ? parent : canvasObj.transform;
+        skillInfoObj.transform.SetParent(parent);
+
+        return skillInfoObj;
     }
 }

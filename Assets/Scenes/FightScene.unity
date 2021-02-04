@@ -1463,6 +1463,8 @@ MonoBehaviour:
     type: 3}
   healthBarPrefab: {fileID: 923648164006518499, guid: da0a1d7f0a7d2e722b45f31513cf98d2,
     type: 3}
+  skillInfoPrefab: {fileID: 5550664012471149307, guid: c885cd21fe14b01aabddcb395a96fdc4,
+    type: 3}
 --- !u!1 &2058466811
 GameObject:
   m_ObjectHideFlags: 0

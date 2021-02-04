@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class SkillButton : MonoBehaviour, IPointerClickHandler
+public class SkillButton :
+    MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     // TODO: write a function to do something when used (basic damage, to start)
     // TODO: add cooldown logic and display
@@ -14,8 +15,9 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
     private FightState fightState;
     public SkillState skill;
     private GameObject buttonBackgroundObj;
-    private GameObject skillImageObj;
+    private Image skillImage;
     private NiceShine buttonShine;
+    private GameObject skillInfoObj;
 
     /* State. */
     private int actionListenerId;
@@ -26,7 +28,7 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
 
         buttonBackgroundObj = transform.Find("ButtonBackground").gameObject;
-        skillImageObj = transform.Find("SkillImage").gameObject;
+        skillImage = transform.Find("SkillImage").GetComponent<Image>();
         buttonShine =
             transform.Find("ButtonBackground/ButtonShine").GetComponent<NiceShine>();
 
@@ -38,13 +40,26 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
     {
         // Set the icon (must be in Start, since Awake runs before `skill` is set).
         Sprite skillIcon = getIconByName(skill.iconName);
-        skillImageObj.GetComponent<Image>().sprite = skillIcon;
+        skillImage.sprite = skillIcon;
+
+        skillInfoObj = PrefabInstantiator.P.CreateSkillInfo(skill, transform);
+        skillInfoObj.SetActive(false);
     }
 
     void OnDestroy()
     {
         fightState.removeActionListener(actionListenerId);
         fightState.removeCuedSkillListener(cuedSkillListenerId);
+    }
+
+    public void OnPointerEnter(PointerEventData ped)
+    {
+        skillInfoObj.SetActive(true);
+    }
+
+    public void OnPointerExit(PointerEventData ped)
+    {
+        skillInfoObj.SetActive(false);
     }
 
     public void OnPointerClick(PointerEventData ped)
@@ -116,6 +131,6 @@ public class SkillButton : MonoBehaviour, IPointerClickHandler
         Color skillImageColor = new Color(1, 1, 1);
         if (!canBeCued)
             skillImageColor.a = 0.5f;
-        skillImageObj.GetComponent<Image>().color = skillImageColor;
+        skillImage.color = skillImageColor;
     }
 }

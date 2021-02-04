@@ -356,9 +356,10 @@ public class SkillState
 
     /* Parameters */
     public int skillId;
-    private string name;
+    public string name;
     public string iconName;
     public int actionCost;
+    public int cooldown;
     public int damage;
     public bool canTargetEnemy;
     public bool canTargetSelf;
@@ -367,6 +368,7 @@ public class SkillState
         string name,
         string iconName,
         int actionCost = 1,
+        int cooldown = 1,
         int damage = 0,
         bool canTargetEnemy = true,
         bool canTargetSelf = false
@@ -376,6 +378,7 @@ public class SkillState
         this.name = name;
         this.iconName = iconName;
         this.actionCost = actionCost;
+        this.cooldown = cooldown;
         this.damage = damage;
         this.canTargetEnemy = canTargetEnemy;
         this.canTargetSelf = canTargetSelf;
