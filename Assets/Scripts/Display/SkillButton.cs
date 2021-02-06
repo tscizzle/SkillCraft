@@ -22,6 +22,7 @@ public class SkillButton :
     private int turnListenerId;
     private int actionListenerId;
     private int cuedSkillListenerId;
+    private int shineListenerId;
 
     void Awake()
     {
@@ -51,6 +52,8 @@ public class SkillButton :
         turnListenerId = fightState.addTurnListener(updateThisSkillButton);
         actionListenerId = fightState.addActionListener(updateThisSkillButton);
         cuedSkillListenerId = fightState.addCuedSkillListener(updateThisSkillButton);
+
+        shineListenerId = fightState.addCuedSkillListener(updateThisSkillButtonShine);
     }
 
     void OnDestroy()
@@ -58,6 +61,8 @@ public class SkillButton :
         fightState.removeTurnListener(turnListenerId);
         fightState.removeActionListener(actionListenerId);
         fightState.removeCuedSkillListener(cuedSkillListenerId);
+
+        fightState.removeCuedSkillListener(shineListenerId);
     }
 
     public void OnPointerEnter(PointerEventData ped)
@@ -81,12 +86,10 @@ public class SkillButton :
         if (fightState.cuedSkillId == skill.skillId)
         {
             fightState.uncueSkill();
-            buttonShine.stop();
         }
         else
         {
             fightState.cueSkill(skill.skillId);
-            buttonShine.animate();
         }
     }
 
@@ -118,7 +121,7 @@ public class SkillButton :
     */
     {
         // When not cued, skill button background is smaller and gray.
-        // When cued, skill button background is larged and gold.
+        // When cued, skill button background is larger and gold.
         bool isThisSkillCued = fightState.cuedSkillId == skill.skillId;
         float cuedSize = 80;
         float uncuedSize = 77;
@@ -129,10 +132,6 @@ public class SkillButton :
         Color cuedColor = new Color(0.92f, 0.75f, 0.36f);
         Color buttonBackgroundColor = isThisSkillCued ? cuedColor : uncuedColor;
         buttonBackgroundObj.GetComponent<Image>().color = buttonBackgroundColor;
-
-        // When not cued, disable button shine.
-        if (!isThisSkillCued)
-            buttonShine.stop();
 
         // Fade this skill if not enough actions left to use.
         bool canBeCued = fightState.currentFighter.currentActions >= skill.actionCost;
@@ -145,5 +144,15 @@ public class SkillButton :
         bool isOnCooldown = skill.currentCooldown > 0;
         cooldownText.text = skill.currentCooldown.ToString();
         cooldownObj.SetActive(isOnCooldown);
+    }
+
+    private void updateThisSkillButtonShine()
+    /* Start or stop button shine based on whether or not this skill is cued. */
+    {
+        bool isThisSkillCued = fightState.cuedSkillId == skill.skillId;
+        if (isThisSkillCued)
+            buttonShine.animate();
+        else
+            buttonShine.stop();
     }
 }

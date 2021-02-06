@@ -185,22 +185,19 @@ public class FightState : MonoBehaviour
         // Move the turn index up 1, wrapping around to the top of the order once the
         // end of the order is reached.
         currentTurnIdx = (currentTurnIdx + 1) % fighterTurnOrder.Count;
+        // Run turn listeners.
+        foreach (Action listener in turnListeners.Values) listener();
 
         // Give the next fighter actions for this turn.
         currentFighter.gainActionsToStartTurn();
+        // Run actions listeners.
+        foreach (Action listener in actionListeners.Values) listener();
 
         // Decrement each skill's cooldown (until 0).
         foreach (SkillState skill in currentFighter.skills.Values)
         {
             skill.currentCooldown = Mathf.Max(skill.currentCooldown - 1, 0);
         }
-
-        // Run turn listeners.
-        foreach (Action listener in turnListeners.Values) listener();
-        // Run actions listeners.
-        foreach (Action listener in actionListeners.Values) listener();
-        // Run cued skill listeners.
-        foreach (Action listener in cuedSkillListeners.Values) listener();
     }
 
     /* Hooks.

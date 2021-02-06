@@ -31,6 +31,9 @@ public class EnemyAI : MonoBehaviour
     {
         isTakingTurn = true;
 
+        // Pause.
+        yield return new WaitForSeconds(2.5f);
+
         // One iteration of this OUTER loop corresponds to one successful skill used.
         // After each one, rerun the skill-choosing algorithm of orderSkillsToUse.
         while (true)
@@ -42,8 +45,9 @@ public class EnemyAI : MonoBehaviour
             // We break from this loop once we successfully use a skill.
             foreach (SkillState skill in skillsToUse)
             {
-                // Cue the skill, and pause.
+                // Cue the skill.
                 fightState.cueSkill(skill.skillId);
+                // Pause.
                 yield return new WaitForSeconds(2.5f);
 
                 // Target either the player or the enemy's self, based on the skill.
@@ -63,6 +67,7 @@ public class EnemyAI : MonoBehaviour
                     didUseSkill = true;
                     // Pause.
                     yield return new WaitForSeconds(2.5f);
+
                     // Exit ths INNER loop so the OUTER loop can continue and
                     // potentially use more skills.
                     break;
