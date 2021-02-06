@@ -23,8 +23,11 @@ public class ActionOrb : MonoBehaviour
         orbShine = transform.Find("OrbBackground/OrbShine").GetComponent<NiceShine>();
 
         setActionIdx();
+    }
 
-        // Register this object to update its display when needed.
+    void Start()
+    {
+        updateThisActionOrb();
         fightState.addActionListener(updateThisActionOrb);
         fightState.addCuedSkillListener(updateThisActionOrb);
     }

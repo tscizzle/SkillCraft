@@ -24,6 +24,7 @@ public class Fighter : MonoBehaviour
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
         characterObj = transform.Find("Character").gameObject;
         hoverLightObj = transform.Find("HoverLight").gameObject;
+
     }
 
     void Start()
@@ -35,6 +36,8 @@ public class Fighter : MonoBehaviour
             : fightState.enemies.Values.ToList()[0].fighterId;
 
         PrefabInstantiator.P.CreateHealthBar(gameObject);
+
+        fightState.addSkillUsedListener(shakeCameraIfThisFightersTurn);
     }
 
     void Update()
@@ -68,24 +71,30 @@ public class Fighter : MonoBehaviour
     }
 
     void OnMouseUpAsButton()
-    /* When clicking a fighter, if a skill is cued, attempt to use it on that fighter.
-    If it happens
+    /* When clicking a fighter, if a skill is cued, attempt to use it on that fighter,
+    and if it failes then let the user know why.
     */
     {
         if (fightState.cuedSkill != null)
         {
             string failureReason = fightState.useSkill(fighterId);
-
             // If skill failed, display the reason to the user.
-            // If it worked, give feedback like camera shake or audio clip.
             if (failureReason != null)
             {
                 // TODO: display reason, like "Not enough actions."
             }
-            else
-            {
-                StartCoroutine(CameraShake.shake());
-            }
         }
+    }
+
+    /* Helpers. */
+
+    private void shakeCameraIfThisFightersTurn()
+    /* Function to shake the camera, which can be registered as a listener on when a
+    skill is used. (Since it may run when another fighter uses a skill, check the
+    current fighter in here.)
+    */
+    {
+        if (fightState.currentFighter.fighterId == fighterId)
+            StartCoroutine(CameraShake.shake());
     }
 }

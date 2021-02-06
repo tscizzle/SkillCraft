@@ -41,11 +41,28 @@ public class FightState : MonoBehaviour
     {
         get { return cuedSkillId != -1 ? currentFighter.skills[cuedSkillId] : null; }
     }
+    public Dictionary<int, SkillState> cueableSkills
+    {
+        get
+        {
+            return currentFighter.skills
+                .Where(p => canSkillBeCued(p.Key))
+                .ToDictionary(p => p.Key, p => p.Value);
+        }
+    }
 
-    /* State subscribers. */
+    /* State subscribers.
+    - Called when certain state changes.
+    - Ok to be called at any time, and "too many times".
+    */
     private Dictionary<int, Action> turnListeners = new Dictionary<int, Action>();
     private Dictionary<int, Action> actionListeners = new Dictionary<int, Action>();
     private Dictionary<int, Action> cuedSkillListeners = new Dictionary<int, Action>();
+    /* Event subscribers.
+    - Called when certain events occur.
+    - Should be called only at the appropriate times, the appropriate number of times.
+    */
+    private Dictionary<int, Action> skillUsedListeners = new Dictionary<int, Action>();
 
     void Awake()
     {
@@ -54,11 +71,6 @@ public class FightState : MonoBehaviour
         // Initiate the first fighter's turn.
         currentTurnIdx = fighterTurnOrder.Count - 1;
         goToNextFightersTurn();
-    }
-
-    void Start()
-    {
-        runAllListeners();
     }
 
     /* PUBLIC API. */
@@ -100,7 +112,7 @@ public class FightState : MonoBehaviour
     }
 
     public void cueSkill(int skillId)
-    /* Prepare a skill to be used. This is what clicking a skill buttons does, so that
+    /* Prepare a skill to be used. This is what clicking a skill button does, so that
     the user can see things like how many actions it will cost, as well as choose the
     target to apply the skill to.
 
@@ -132,10 +144,10 @@ public class FightState : MonoBehaviour
         string explaining why not.
     */
     {
-        string reason = precheckSkillUse(targetFighterId);
-        if (reason != null)
+        string failureReason = precheckSkillUse(targetFighterId);
+        if (failureReason != null)
         {
-            return reason;
+            return failureReason;
         }
 
         // Use up actions.
@@ -157,6 +169,8 @@ public class FightState : MonoBehaviour
 
         // Run action listeners.
         foreach (Action listener in actionListeners.Values) listener();
+        // Run skill used subscribers.
+        foreach (Action listener in skillUsedListeners.Values) listener();
 
         return null;
     }
@@ -191,7 +205,8 @@ public class FightState : MonoBehaviour
 
     /* Hooks.
 
-    These allow code like display code to subscribe to state change events.
+    These allow code like display code to subscribe to state changes, or effects to
+    happen in response to events.
 
     Each register<Something>Listener takes 1 param: an Action (which takes no params, no
     return value) which will run when the relevant state changes, and returns an int
@@ -244,6 +259,21 @@ public class FightState : MonoBehaviour
         cuedSkillListeners.Remove(listenerId);
     }
 
+    public int addSkillUsedListener(Action listener)
+    /*  Relevant event: successful `useSkill` */
+    {
+        int listenerId = previousListenerId + 1;
+        skillUsedListeners.Add(listenerId, listener);
+        previousListenerId = listenerId;
+        return listenerId;
+    }
+
+    public void removeSkillUsedListener(int listenerId)
+    /*  Relevant state: successful `useSkill` */
+    {
+        skillUsedListeners.Remove(listenerId);
+    }
+
     /* Helpers. */
 
     private string precheckSkillUse(int targetFighterId)
@@ -269,26 +299,14 @@ public class FightState : MonoBehaviour
         return null;
     }
 
-    private void runAllListeners()
-    /* For situations when we just want the whole display to update (like at the very
-    beginning), run all registered listeners, regardless of what state they are
-    subscribed to.
-    */
-    {
-        // Run turn listeners.
-        foreach (Action listener in turnListeners.Values) listener();
-        // Run actions listeners.
-        foreach (Action listener in actionListeners.Values) listener();
-        // Run cued skill listeners.
-        foreach (Action listener in cuedSkillListeners.Values) listener();
-    }
-
     private void hardCodeFightersAndSkills()
     {
         // Create the player.
         addFighter(isPlayer: true, maxHealth: playerMaxHealth);
         player.addSkill(
-            new SkillState("Fireball", "icon_69", actionCost: 2, damage: 10)
+            new SkillState(
+                "Fireball", "icon_69", actionCost: 2, cooldown: 2, damage: 10
+            )
         );
         player.addSkill(new SkillState("Punch", "icon_126", damage: 3));
         player.addSkill(
@@ -303,7 +321,9 @@ public class FightState : MonoBehaviour
         // Create the enemies.
         addFighter(isPlayer: false, maxHealth: enemyMaxHealth);
         FighterState enemy = enemies.ToList()[0].Value;
-        enemy.addSkill(new SkillState("Kick", "icon_16", damage: 3));
+        enemy.addSkill(
+            new SkillState("Kick", "icon_16", actionCost: 2, cooldown: 0, damage: 3)
+        );
 
         // Set the turn order.
         fighterTurnOrder.Add(playerFighterId);
@@ -396,7 +416,7 @@ public class SkillState
         string name,
         string iconName,
         int actionCost = 1,
-        int totalCooldown = 1,
+        int cooldown = 1,
         int damage = 0,
         DamageType damageType = DamageType.Physical,
         bool canTargetEnemy = true,
@@ -407,7 +427,7 @@ public class SkillState
         this.name = name;
         this.iconName = iconName;
         this.actionCost = actionCost;
-        this.cooldown = totalCooldown;
+        this.cooldown = cooldown;
         this.damage = damage;
         this.damageType = damageType;
         this.canTargetEnemy = canTargetEnemy;

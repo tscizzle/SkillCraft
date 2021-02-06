@@ -11,8 +11,11 @@ public class SkillButtonRow : MonoBehaviour
     void Awake()
     {
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
+    }
 
-        // Register this object to update its display when needed.
+    void Start()
+    {
+        updateCurrentSkillButtons();
         fightState.addTurnListener(updateCurrentSkillButtons);
     }
 
