@@ -195,9 +195,7 @@ public class FightState : MonoBehaviour
 
         // Decrement each skill's cooldown (until 0).
         foreach (SkillState skill in currentFighter.skills.Values)
-        {
             skill.currentCooldown = Mathf.Max(skill.currentCooldown - 1, 0);
-        }
     }
 
     /* Hooks.
