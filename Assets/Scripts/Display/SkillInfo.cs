@@ -30,11 +30,18 @@ public class SkillInfo : MonoBehaviour
     void Start()
     {
         nameText.text = skill.name;
+
         skillImage.sprite =
             transform.parent.Find("SkillImage").GetComponent<Image>().sprite;
+
         actionCostText.text = $"x{skill.actionCost}";
+
         cooldownText.text = $"Cooldown: {skill.cooldown}";
-        detailsText.text = $"Damage: {skill.damage} physical";
+
+        string damageText = skill.damage != 0
+            ? $"Damage: {skill.damage} {skill.damageType}"
+            : "";
+        detailsText.text = $"{damageText}";
     }
 
     void Update()

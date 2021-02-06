@@ -7,9 +7,6 @@ using UnityEngine.EventSystems;
 public class SkillButton :
     MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    // TODO: write a function to do something when used (basic damage, to start)
-    // TODO: add cooldown logic and display
-
     /* References. */
     public List<Sprite> iconOptions; // populated on the prefab in the Inspector
     private FightState fightState;
@@ -17,9 +14,12 @@ public class SkillButton :
     private GameObject buttonBackgroundObj;
     private Image skillImage;
     private NiceShine buttonShine;
+    private GameObject cooldownObj;
+    private Text cooldownText;
     private GameObject skillInfoObj;
 
     /* State. */
+    private int turnListenerId;
     private int actionListenerId;
     private int cuedSkillListenerId;
 
@@ -29,11 +29,13 @@ public class SkillButton :
 
         buttonBackgroundObj = transform.Find("ButtonBackground").gameObject;
         skillImage = transform.Find("SkillImage").GetComponent<Image>();
-        buttonShine =
-            transform.Find("ButtonBackground/ButtonShine").GetComponent<NiceShine>();
-
-        actionListenerId = fightState.addActionListener(updateThisSkillButton);
-        cuedSkillListenerId = fightState.addCuedSkillListener(updateThisSkillButton);
+        buttonShine = transform
+            .Find("ButtonBackground/ButtonShine")
+            .GetComponent<NiceShine>();
+        cooldownObj = transform.Find("SkillImage/CooldownBackground").gameObject;
+        cooldownText = transform
+            .Find("SkillImage/CooldownBackground/CooldownText")
+            .GetComponent<Text>();
     }
 
     void Start()
@@ -44,10 +46,16 @@ public class SkillButton :
 
         skillInfoObj = PrefabInstantiator.P.CreateSkillInfo(skill, transform);
         skillInfoObj.SetActive(false);
+
+        updateThisSkillButton();
+        turnListenerId = fightState.addTurnListener(updateThisSkillButton);
+        actionListenerId = fightState.addActionListener(updateThisSkillButton);
+        cuedSkillListenerId = fightState.addCuedSkillListener(updateThisSkillButton);
     }
 
     void OnDestroy()
     {
+        fightState.removeTurnListener(turnListenerId);
         fightState.removeActionListener(actionListenerId);
         fightState.removeCuedSkillListener(cuedSkillListenerId);
     }
@@ -65,7 +73,7 @@ public class SkillButton :
     public void OnPointerClick(PointerEventData ped)
     {
         // Don't do anything if not enough actions to cue this button.
-        bool canBeCued = fightState.currentFighter.currentActions >= skill.actionCost;
+        bool canBeCued = fightState.canSkillBeCued(skill.skillId);
         if (!canBeCued)
             return;
 
@@ -113,7 +121,7 @@ public class SkillButton :
         // When cued, skill button background is larged and gold.
         bool isThisSkillCued = fightState.cuedSkillId == skill.skillId;
         float cuedSize = 80;
-        float uncuedSize = 76;
+        float uncuedSize = 77;
         float buttonBackgroundSize = isThisSkillCued ? cuedSize : uncuedSize;
         buttonBackgroundObj.GetComponent<RectTransform>().sizeDelta =
             new Vector2(buttonBackgroundSize, buttonBackgroundSize);
@@ -132,5 +140,10 @@ public class SkillButton :
         if (!canBeCued)
             skillImageColor.a = 0.5f;
         skillImage.color = skillImageColor;
+
+        // When on cooldown, darken the button and show the number of turns remaining.
+        bool isOnCooldown = skill.currentCooldown > 0;
+        cooldownText.text = skill.currentCooldown.ToString();
+        cooldownObj.SetActive(isOnCooldown);
     }
 }

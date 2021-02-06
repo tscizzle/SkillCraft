@@ -84,6 +84,21 @@ public class FightState : MonoBehaviour
         return newFighter.fighterId;
     }
 
+    public bool canSkillBeCued(int skillId)
+    /* Return whether or not the supplied skill can be cued to be used right now.
+
+    :param int skillId: Id of the skill in question.
+    
+    :return bool canBeCued:
+    */
+    {
+        SkillState skill = currentFighter.skills[skillId];
+        bool hasEnoughActions = currentFighter.currentActions >= skill.actionCost;
+        bool isOnCooldown = skill.currentCooldown > 0;
+        bool canBeCued = hasEnoughActions && !isOnCooldown;
+        return canBeCued;
+    }
+
     public void cueSkill(int skillId)
     /* Prepare a skill to be used. This is what clicking a skill buttons does, so that
     the user can see things like how many actions it will cost, as well as choose the
@@ -134,6 +149,9 @@ public class FightState : MonoBehaviour
         int newHealth = Mathf.Max(0, targetFighter.currentHealth - damage);
         targetFighter.setHealth(newHealth);
 
+        // Start the skill's cooldown.
+        cuedSkill.currentCooldown = cuedSkill.cooldown;
+
         // Uncue the used skill.
         uncueSkill();
 
@@ -156,6 +174,12 @@ public class FightState : MonoBehaviour
 
         // Give the next fighter actions for this turn.
         currentFighter.gainActionsToStartTurn();
+
+        // Decrement each skill's cooldown (until 0).
+        foreach (SkillState skill in currentFighter.skills.Values)
+        {
+            skill.currentCooldown = Mathf.Max(skill.currentCooldown - 1, 0);
+        }
 
         // Run turn listeners.
         foreach (Action listener in turnListeners.Values) listener();
@@ -361,15 +385,20 @@ public class SkillState
     public int actionCost;
     public int cooldown;
     public int damage;
+    public DamageType damageType;
     public bool canTargetEnemy;
     public bool canTargetSelf;
+
+    /* State. */
+    public int currentCooldown;
 
     public SkillState(
         string name,
         string iconName,
         int actionCost = 1,
-        int cooldown = 1,
+        int totalCooldown = 1,
         int damage = 0,
+        DamageType damageType = DamageType.Physical,
         bool canTargetEnemy = true,
         bool canTargetSelf = false
     )
@@ -378,11 +407,23 @@ public class SkillState
         this.name = name;
         this.iconName = iconName;
         this.actionCost = actionCost;
-        this.cooldown = cooldown;
+        this.cooldown = totalCooldown;
         this.damage = damage;
+        this.damageType = damageType;
         this.canTargetEnemy = canTargetEnemy;
         this.canTargetSelf = canTargetSelf;
 
+        this.currentCooldown = 0;
+
         previousSkillId = skillId;
     }
+}
+
+public enum DamageType
+{
+    Physical,
+    Water,
+    Earth,
+    Fire,
+    Air,
 }
