@@ -10,10 +10,15 @@ public class TurnDisplay : MonoBehaviour
     public float duration;
     public float amplitude;
     public float period;
+    public Color playerBackgroundColor;
+    public Color playerTextColor;
+    public Color enemyBackgroundColor;
+    public Color enemyTextColor;
 
     /* References. */
     private FightState fightState;
     private RectTransform rect;
+    private Image backgroundImage;
     private Text turnText;
     private Tween currentTween;
 
@@ -21,6 +26,7 @@ public class TurnDisplay : MonoBehaviour
     {
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
         rect = GetComponent<RectTransform>();
+        backgroundImage = GetComponent<Image>();
         turnText = transform.Find("TurnText").GetComponent<Text>();
 
         reset();
@@ -35,22 +41,23 @@ public class TurnDisplay : MonoBehaviour
     /* Helpers. */
 
     private void animate()
-    /* Update the turn indicator and slide it into view.
-    
-    https://easings.net/ has info on the Ease values.
-    */
+    /* Update the turn indicator and slide it into view. */
     {
         // Start it in the correct state (off screen and transparent).
         reset();
 
-        /* Set the text to be for the current fighter. */
-        string currentTurn = fightState.currentFighter.isPlayer ? "Your" : "Enemy's";
-        turnText.text = $"{currentTurn} Turn";
+        // Set the text and color to be for the current fighter.
+        bool isPlayerTurn = fightState.currentFighter.isPlayer;
+        Color backgroundColor = isPlayerTurn
+            ? playerBackgroundColor
+            : enemyBackgroundColor;
+        Color textColor = isPlayerTurn ? playerTextColor : enemyTextColor;
+        string whoseTurn = fightState.currentFighter.isPlayer ? "Your" : "Enemy's";
+        backgroundImage.color = backgroundColor;
+        turnText.color = textColor;
+        turnText.text = $"{whoseTurn} Turn";
 
-        /* Move it into view.
-
-        The move-in wiggles, with OutElastic.
-        */
+        // Move it into view.
         currentTween = rect
             .DOAnchorPosX(20, duration)
             .SetEase(Ease.OutElastic, amplitude, period);

@@ -1203,7 +1203,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 180, y: 40}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1261677616
 MonoBehaviour:
@@ -1218,7 +1218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1227,7 +1227,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: f08437ad73cacf6bf8f4d939afd3e92f, type: 3}
-    m_FontSize: 18
+    m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -1388,7 +1388,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 20, y: -5}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 180, y: 40}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1428022842
 MonoBehaviour:
@@ -1403,7 +1403,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1443,6 +1443,10 @@ MonoBehaviour:
   duration: 0.5
   amplitude: 0.5
   period: 0.3
+  playerBackgroundColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+  playerTextColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  enemyBackgroundColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+  enemyTextColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
 --- !u!1 &1432458320
 GameObject:
   m_ObjectHideFlags: 0
@@ -1532,6 +1536,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ceb24298696d912dc81b8f8f71ce9446, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inDuration: 0.65
+  stayDuration: 0.7
+  outDuration: 0.8
+  moveInAmplitude: 0.3
+  moveInPeriod: 0.2
+  moveOutOvershoot: 0.5
 --- !u!1 &1493882844
 GameObject:
   m_ObjectHideFlags: 0
