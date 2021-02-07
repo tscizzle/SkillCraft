@@ -6,6 +6,14 @@ using DG.Tweening;
 
 public class UsedSkill : MonoBehaviour
 {
+    /* Parameters. */
+    public float inDuration;
+    public float stayDuration;
+    public float outDuration;
+    public float moveInAmplitude;
+    public float moveInPeriod;
+    public float moveOutOvershoot;
+
     /* References. */
     private FightState fightState;
     private RectTransform rect;
@@ -16,8 +24,8 @@ public class UsedSkill : MonoBehaviour
     void Awake()
     {
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
-        rect = transform.GetComponent<RectTransform>();
-        skillBackground = transform.GetComponent<Image>();
+        rect = GetComponent<RectTransform>();
+        skillBackground = GetComponent<Image>();
         skillImage = transform.Find("UsedSkillImage").GetComponent<Image>();
 
         reset();
@@ -28,9 +36,9 @@ public class UsedSkill : MonoBehaviour
         fightState.addSkillUsedListener(animate);
     }
 
-    /* PUBLIC API. */
+    /* Helpers. */
 
-    public void animate()
+    private void animate()
     /* Slide an image of the cued skill (which, presumably, was just used) into view.
     
     https://easings.net/ has info on the Ease values.
@@ -43,16 +51,13 @@ public class UsedSkill : MonoBehaviour
         Sprite skillIcon = SkillButton.getIconByName(fightState.cuedSkill.iconName);
         skillImage.sprite = skillIcon;
 
-        /* Fade+move the it into view and then out.
+        /* Fade+move it into view and then out.
         
         The fade-in gets to opaque quickly, with OutQuad.
         The fade-out stays opaque longer, with InQuad.
         The move-in wiggles, with OutElastic.
         The move-out goes down briefly then up quickly, with InBack and faraway target.
         */
-        float inDuration = 1;
-        float stayDuration = 0.5f;
-        float outDuration = 1;
         Sequence seq = DOTween.Sequence();
         // Fade the skill background.
         Sequence backgroundFadeSeq = DOTween.Sequence()
@@ -66,9 +71,17 @@ public class UsedSkill : MonoBehaviour
             .Append(skillImage.DOFade(0, outDuration).SetEase(Ease.InQuad));
         // Movement.
         Sequence moveSeq = DOTween.Sequence()
-            .Append(rect.DOAnchorPosY(-200, inDuration).SetEase(Ease.OutElastic, 0.3f))
+            .Append(
+                rect
+                    .DOAnchorPosY(-200, inDuration)
+                    .SetEase(Ease.OutElastic, moveInAmplitude, moveInPeriod)
+            )
             .AppendInterval(stayDuration)
-            .Append(rect.DOAnchorPosY(10000, outDuration).SetEase(Ease.InBack, 0.5f));
+            .Append(
+                rect
+                    .DOAnchorPosY(10000, outDuration)
+                    .SetEase(Ease.InBack, moveOutOvershoot)
+            );
         // Combine them all.
         seq.Insert(0, backgroundFadeSeq);
         seq.Insert(0, imageFadeSeq);
@@ -77,11 +90,9 @@ public class UsedSkill : MonoBehaviour
         currentTween = seq;
     }
 
-    /* Helpers. */
-
     private void reset()
     /* Start this image off screen and transparent, so animating it gradually brings it
-    into view.
+    into view. Also, if there is a tween currently occurring, kill it.
     */
     {
         if (currentTween != null) currentTween.Kill();
