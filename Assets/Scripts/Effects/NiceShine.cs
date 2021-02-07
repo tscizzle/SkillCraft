@@ -14,7 +14,7 @@ public class NiceShine : MonoBehaviour
     public float repeatDelay;
 
     /* State. */
-    private Tween currentTween = null;
+    private Tween currentTween;
 
     void OnDestroy()
     {

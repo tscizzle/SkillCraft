@@ -152,6 +152,8 @@ public class FightState : MonoBehaviour
 
         // Use up actions.
         currentFighter.currentActions -= cuedSkill.actionCost;
+        // Run action listeners.
+        foreach (Action listener in actionListeners.Values) listener();
 
         // Calculate damage.
         int damage = cuedSkill.damage;
@@ -160,17 +162,13 @@ public class FightState : MonoBehaviour
         FighterState targetFighter = fighters[targetFighterId];
         int newHealth = Mathf.Max(0, targetFighter.currentHealth - damage);
         targetFighter.setHealth(newHealth);
-
         // Start the skill's cooldown.
         cuedSkill.currentCooldown = cuedSkill.cooldown;
+        // Run skill used subscribers.
+        foreach (Action listener in skillUsedListeners.Values) listener();
 
         // Uncue the used skill.
         uncueSkill();
-
-        // Run action listeners.
-        foreach (Action listener in actionListeners.Values) listener();
-        // Run skill used subscribers.
-        foreach (Action listener in skillUsedListeners.Values) listener();
 
         return null;
     }

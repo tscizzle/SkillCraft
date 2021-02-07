@@ -7,6 +7,11 @@ using UnityEngine.EventSystems;
 public class SkillButton :
     MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    /* Constants. */
+    static public Color uncuedColor = new Color(0.75f, 0.75f, 0.75f);
+    static public Color cuedColor = new Color(0.92f, 0.75f, 0.36f);
+    static public List<Sprite> iconOptionsStatic;
+
     /* References. */
     public List<Sprite> iconOptions; // populated on the prefab in the Inspector
     private FightState fightState;
@@ -26,6 +31,11 @@ public class SkillButton :
 
     void Awake()
     {
+        // When the first SkillButton is created, populate this field so other objects
+        // can access the icons off the SkillButton class itself.
+        if (iconOptionsStatic == null)
+            iconOptionsStatic = iconOptions;
+
         fightState = GameObject.Find("GeneralScripts").GetComponent<FightState>();
 
         buttonBackgroundObj = transform.Find("ButtonBackground").gameObject;
@@ -95,7 +105,7 @@ public class SkillButton :
 
     /* Helpers. */
 
-    private Sprite getIconByName(string iconName)
+    static public Sprite getIconByName(string iconName)
     /* Given a string name of an icon, get the Sprite object for that icon from the
     list of options stored on this prefab.
 
@@ -105,7 +115,7 @@ public class SkillButton :
     :return Sprite icon:
     */
     {
-        foreach (Sprite icon in iconOptions)
+        foreach (Sprite icon in iconOptionsStatic)
         {
             if (icon.name == iconName)
                 return icon;
@@ -128,8 +138,6 @@ public class SkillButton :
         float buttonBackgroundSize = isThisSkillCued ? cuedSize : uncuedSize;
         buttonBackgroundObj.GetComponent<RectTransform>().sizeDelta =
             new Vector2(buttonBackgroundSize, buttonBackgroundSize);
-        Color uncuedColor = new Color(0.75f, 0.75f, 0.75f);
-        Color cuedColor = new Color(0.92f, 0.75f, 0.36f);
         Color buttonBackgroundColor = isThisSkillCued ? cuedColor : uncuedColor;
         buttonBackgroundObj.GetComponent<Image>().color = buttonBackgroundColor;
 
