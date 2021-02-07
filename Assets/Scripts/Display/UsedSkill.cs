@@ -45,8 +45,8 @@ public class UsedSkill : MonoBehaviour
 
         /* Fade+move the it into view and then out.
         
-        The fade-in gets to opaque quickly, with OutExpo.
-        The fade-out stays opaque longer, with InExpo.
+        The fade-in gets to opaque quickly, with OutQuad.
+        The fade-out stays opaque longer, with InQuad.
         The move-in wiggles, with OutElastic.
         The move-out goes down briefly then up quickly, with InBack and faraway target.
         */
@@ -56,14 +56,14 @@ public class UsedSkill : MonoBehaviour
         Sequence seq = DOTween.Sequence();
         // Fade the skill background.
         Sequence backgroundFadeSeq = DOTween.Sequence()
-            .Append(skillBackground.DOFade(1, inDuration).SetEase(Ease.OutExpo))
+            .Append(skillBackground.DOFade(1, inDuration).SetEase(Ease.OutQuad))
             .AppendInterval(stayDuration)
-            .Append(skillBackground.DOFade(0, outDuration).SetEase(Ease.InExpo));
+            .Append(skillBackground.DOFade(0, outDuration).SetEase(Ease.InQuad));
         // Fade the skill image.
         Sequence imageFadeSeq = DOTween.Sequence()
-            .Append(skillImage.DOFade(1, inDuration).SetEase(Ease.OutExpo))
+            .Append(skillImage.DOFade(1, inDuration).SetEase(Ease.OutQuad))
             .AppendInterval(stayDuration)
-            .Append(skillImage.DOFade(0, outDuration).SetEase(Ease.InExpo));
+            .Append(skillImage.DOFade(0, outDuration).SetEase(Ease.InQuad));
         // Movement.
         Sequence moveSeq = DOTween.Sequence()
             .Append(rect.DOAnchorPosY(-200, inDuration).SetEase(Ease.OutElastic, 0.3f))

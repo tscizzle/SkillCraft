@@ -66,7 +66,7 @@ public class EnemyAI : MonoBehaviour
                         getSkillUsedCount(skill.skillId) + 1;
                     didUseSkill = true;
                     // Pause.
-                    yield return new WaitForSeconds(2);
+                    yield return new WaitForSeconds(3);
 
                     // Exit ths INNER loop so the OUTER loop can continue and
                     // potentially use more skills.
