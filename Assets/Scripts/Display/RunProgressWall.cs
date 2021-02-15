@@ -5,12 +5,12 @@ using UnityEngine;
 public class RunProgressWall : MonoBehaviour
 {
     /* References. */
-    private SkillCreationCameraView skillCreationCameraView;
+    private InterfightCameraView skillCreationCameraView;
 
     void Awake()
     {
         skillCreationCameraView =
-            GameObject.Find("GeneralScripts").GetComponent<SkillCreationCameraView>();
+            GameObject.Find("GeneralScripts").GetComponent<InterfightCameraView>();
     }
 
     /* PUBLIC API. */

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class SkillCreationCameraView : MonoBehaviour
+public class InterfightCameraView : MonoBehaviour
 {
     /* Constants. */
     private Dictionary<CameraView, (Vector3, Vector3)> viewMap =
@@ -32,7 +32,7 @@ public class SkillCreationCameraView : MonoBehaviour
     /* PUBLIC API. */
 
     public void setView(CameraView view)
-    /* Move to viewing a different part of the SkillCreation scene, including animating
+    /* Move to viewing a different part of the Interfight scene, including animating
     the camera to get there.
     */
     {
@@ -44,6 +44,9 @@ public class SkillCreationCameraView : MonoBehaviour
         if (view == currentView)
             return;
 
+        // Update the current view.
+        currentView = view;
+        // Animate the camera toward that view.
         Sequence seq = DOTween.Sequence();
         (Vector3 nextPosition, Vector3 nextRotation) = viewMap[view];
         Tween positionTween = Camera.main.transform
@@ -57,7 +60,6 @@ public class SkillCreationCameraView : MonoBehaviour
         seq.OnComplete(() =>
         {
             currentTween = null;
-            currentView = view;
         });
         currentTween = seq;
     }

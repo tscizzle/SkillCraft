@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class SkillButton :
-    MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class SkillButton
+    : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     /* Constants. */
     static public Color uncuedColor = new Color(0.75f, 0.75f, 0.75f);

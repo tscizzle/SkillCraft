@@ -2,87 +2,76 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class SkillCreationWall : MonoBehaviour
+public class SkillCreationWall
+    : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     /* Constants. */
-    private float hoverAlpha = 0.2f;
+    private float hoveredAlpha = 0.2f;
+    private float viewedAlpha = 0.16f;
 
     /* References. */
-    private SkillCreationCameraView skillCreationCameraView;
+    private InterfightCameraView interfightCameraView;
     private Image backgroundImage;
+    private InputField skillNameInput;
 
     /* State. */
     private bool isHovered = false;
+    // `edited*` arefields of the skill being edited.
+    private string editedName;
+    private Sprite editedImage;
 
     void Awake()
     {
-        skillCreationCameraView =
-            GameObject.Find("GeneralScripts").GetComponent<SkillCreationCameraView>();
+        interfightCameraView =
+            GameObject.Find("GeneralScripts").GetComponent<InterfightCameraView>();
         backgroundImage = transform.Find("TransparentBackground").GetComponent<Image>();
+        skillNameInput =
+            transform.Find("EditedSkill/NameInput").GetComponent<InputField>();
+
+        // Update the skill name variable when the user types.
+        skillNameInput.onValueChanged.AddListener(newValue => editedName = newValue);
     }
 
     void Update()
     {
-        if (noHoverEffect())
-            setBackgroundAlpha(0);
-        else
-        {
-            float alpha = isHovered ? hoverAlpha : 0;
-            setBackgroundAlpha(alpha);
-        }
+        setBackgroundAlpha();
     }
 
-    /* PUBLIC API. */
-
-    public void OnClickSkillCreationWall()
-    /* Moves the camera to view the wall the skill creation UI is on. This function is
-    registered as handler for when the wall is clicked.
-    */
-    {
-        CameraView nextView = skillCreationCameraView.currentView == CameraView.Right
-            ? CameraView.Start
-            : CameraView.Right;
-        skillCreationCameraView.setView(nextView);
-    }
-
-    public void OnHoverSkillCreationWall()
-    /* Highlight the wall when hovered, to indicate that it's clickable. This function
-    is registered as handler for when the mouse pointer enters the wall.
-    */
+    public void OnPointerEnter(PointerEventData ped)
     {
         isHovered = true;
     }
 
-    public void OnUnhoverSkillCreationWall()
-    /* Stop highlighting the wall when no longer hovering. This function is registered
-    as handler for when the mouse pointer exits the wall.
-    */
+    public void OnPointerExit(PointerEventData ped)
     {
         isHovered = false;
     }
 
-    /* Helpers. */
-
-    private bool noHoverEffect()
-    /* If already at this view, or currently animating between views, don't highlight
-    the background.
-    */
+    public void OnPointerClick(PointerEventData ped)
     {
-        bool noHover = (
-            skillCreationCameraView.currentView == CameraView.Right
-            || skillCreationCameraView.isBetweenViews()
-        );
-        return noHover;
+        if (interfightCameraView.currentView == CameraView.Start)
+            interfightCameraView.setView(CameraView.Right);
     }
 
-    private void setBackgroundAlpha(float alpha)
+    /* Helpers. */
+
+    private void setBackgroundAlpha()
     /* Set the transparency of the background that covers the whole canvas (keeping the
     same RGB color it already was).
-    
-    :param float alpha: Between 0 for transparent and 1 for opaque.
     */
     {
+        CameraView currentView = interfightCameraView.currentView;
+
+        float alpha;
+        if (currentView == CameraView.Right)
+            alpha = viewedAlpha;
+        else if (currentView == CameraView.Start && isHovered)
+            alpha = hoveredAlpha;
+        else
+            alpha = 0;
+
         Color color = backgroundImage.color;
         color.a = alpha;
         backgroundImage.color = color;
