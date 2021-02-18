@@ -15,6 +15,11 @@ public class SkillCreationWall
     private InterfightCameraView interfightCameraView;
     private Image backgroundImage;
     private InputField skillNameInput;
+    private GameObject selectImageObj;
+    private GameObject imageOptionsObj;
+
+    /* Parameters. */
+    public List<Sprite> iconOptions; // populated in the Inspector
 
     /* State. */
     private bool isHovered = false;
@@ -29,9 +34,17 @@ public class SkillCreationWall
         backgroundImage = transform.Find("TransparentBackground").GetComponent<Image>();
         skillNameInput =
             transform.Find("EditedSkill/NameInput").GetComponent<InputField>();
+        selectImageObj = transform.Find("EditedSkill/ImageInput/Image").gameObject;
+        imageOptionsObj =
+            transform.Find("EditedSkill/ImageInput/ImageOptionsScrollView").gameObject;
 
         // Update the skill name variable when the user types.
         skillNameInput.onValueChanged.AddListener(newValue => editedName = newValue);
+    }
+
+    void Start()
+    {
+        populateImageOptions();
     }
 
     void Update()
@@ -52,7 +65,33 @@ public class SkillCreationWall
     public void OnPointerClick(PointerEventData ped)
     {
         if (interfightCameraView.currentView == CameraView.Start)
+        // Not viewing a wall yet. Any click here brings the view to this wall.
+        {
             interfightCameraView.setView(CameraView.Right);
+        }
+        else if (interfightCameraView.currentView == CameraView.Right)
+        // Already viewing this wall. Clicks here can do actual skill creation logic.
+        {
+            GameObject clickedObj = ped.rawPointerPress;
+
+            if (clickedObj == selectImageObj)
+            // Toggle the image options scroll view open or closed.
+            {
+                imageOptionsObj.SetActive(!imageOptionsObj.activeSelf);
+            }
+            else if (clickedObj.name.Contains("ImageOption_"))
+            // Select a new image for this skill.
+            {
+                Sprite clickedImage = clickedObj.GetComponent<Image>().sprite;
+
+                editedImage = clickedImage;
+
+                selectImageObj.GetComponent<Image>().color = Color.white;  // alpha of 1
+                selectImageObj.GetComponent<Image>().sprite = clickedImage;
+
+                imageOptionsObj.SetActive(false);
+            }
+        }
     }
 
     /* Helpers. */
@@ -75,5 +114,32 @@ public class SkillCreationWall
         Color color = backgroundImage.color;
         color.a = alpha;
         backgroundImage.color = color;
+    }
+
+    private void populateImageOptions()
+    /* For every icon option, place an object in the scrollable list of images. */
+    {
+        GameObject contentObj =
+            imageOptionsObj.transform.Find("Viewport/Content").gameObject;
+
+        foreach (Sprite icon in iconOptions)
+        {
+            // Create an object (and name it something we can look for in the wall's
+            // click handler).
+            GameObject imageOptionObj = new GameObject($"ImageOption_{icon.name}");
+            // Give this object the image of the relevant icon.
+            Image imageOption = imageOptionObj.AddComponent<Image>();
+            imageOption.sprite = icon;
+            // Place this object in the hierarchy in the content of the scroll view.
+            imageOptionObj
+                .GetComponent<RectTransform>()
+                .SetParent(contentObj.transform);
+            // Set position and size.
+            Vector3 position = imageOptionObj.GetComponent<RectTransform>().localPosition;
+            position.z = 0;
+            imageOptionObj.GetComponent<RectTransform>().localPosition = position;
+            imageOptionObj.GetComponent<RectTransform>().sizeDelta = new Vector2(80, 80);
+            imageOptionObj.GetComponent<RectTransform>().localScale = Vector3.one;
+        }
     }
 }
