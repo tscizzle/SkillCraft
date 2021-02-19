@@ -20,6 +20,7 @@ public class SkillCreationWall
     private GameObject imageInputTextObj;
     private GameObject imageInputImageObj;
     private GameObject imageOptionsObj;
+    private GameObject stepsContainerObj;
 
     /* Parameters. */
     public List<Sprite> iconOptions; // populated in the Inspector
@@ -42,6 +43,7 @@ public class SkillCreationWall
         imageInputImageObj = transform.Find("EditedSkill/ImageInput/Image").gameObject;
         imageOptionsObj =
             transform.Find("EditedSkill/ImageInput/ImageOptionsScrollView").gameObject;
+        stepsContainerObj = transform.Find("EditedSkill/StepsContainer").gameObject;
 
         // Update the skill name variable when the user types.
         skillNameInput.onValueChanged.AddListener(newValue => editedName = newValue);
@@ -142,7 +144,8 @@ public class SkillCreationWall
                 .GetComponent<RectTransform>()
                 .SetParent(contentObj.transform);
             // Set position and size.
-            Vector3 position = imageOptionObj.GetComponent<RectTransform>().localPosition;
+            Vector3 position =
+                imageOptionObj.GetComponent<RectTransform>().localPosition;
             position.z = 0;
             imageOptionObj.GetComponent<RectTransform>().localPosition = position;
             imageOptionObj.GetComponent<RectTransform>().localScale = Vector3.one;
