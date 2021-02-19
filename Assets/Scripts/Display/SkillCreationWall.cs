@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 public class SkillCreationWall
     : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
@@ -15,7 +16,9 @@ public class SkillCreationWall
     private InterfightCameraView interfightCameraView;
     private Image backgroundImage;
     private InputField skillNameInput;
-    private GameObject selectImageObj;
+    private GameObject imageInputObj;
+    private GameObject imageInputTextObj;
+    private GameObject imageInputImageObj;
     private GameObject imageOptionsObj;
 
     /* Parameters. */
@@ -34,7 +37,9 @@ public class SkillCreationWall
         backgroundImage = transform.Find("TransparentBackground").GetComponent<Image>();
         skillNameInput =
             transform.Find("EditedSkill/NameInput").GetComponent<InputField>();
-        selectImageObj = transform.Find("EditedSkill/ImageInput/Image").gameObject;
+        imageInputObj = transform.Find("EditedSkill/ImageInput").gameObject;
+        imageInputTextObj = transform.Find("EditedSkill/ImageInput/Text").gameObject;
+        imageInputImageObj = transform.Find("EditedSkill/ImageInput/Image").gameObject;
         imageOptionsObj =
             transform.Find("EditedSkill/ImageInput/ImageOptionsScrollView").gameObject;
 
@@ -74,7 +79,7 @@ public class SkillCreationWall
         {
             GameObject clickedObj = ped.rawPointerPress;
 
-            if (clickedObj == selectImageObj)
+            if (clickedObj == imageInputTextObj || clickedObj == imageInputImageObj)
             // Toggle the image options scroll view open or closed.
             {
                 imageOptionsObj.SetActive(!imageOptionsObj.activeSelf);
@@ -86,8 +91,10 @@ public class SkillCreationWall
 
                 editedImage = clickedImage;
 
-                selectImageObj.GetComponent<Image>().color = Color.white;  // alpha of 1
-                selectImageObj.GetComponent<Image>().sprite = clickedImage;
+                imageInputTextObj.SetActive(false);
+                imageInputImageObj.SetActive(true);
+                imageInputImageObj.GetComponent<Image>().sprite = clickedImage;
+                imageInputImageObj.GetComponent<Image>().DOFade(1, 1).From(0);
 
                 imageOptionsObj.SetActive(false);
             }
@@ -138,7 +145,6 @@ public class SkillCreationWall
             Vector3 position = imageOptionObj.GetComponent<RectTransform>().localPosition;
             position.z = 0;
             imageOptionObj.GetComponent<RectTransform>().localPosition = position;
-            imageOptionObj.GetComponent<RectTransform>().sizeDelta = new Vector2(80, 80);
             imageOptionObj.GetComponent<RectTransform>().localScale = Vector3.one;
         }
     }
