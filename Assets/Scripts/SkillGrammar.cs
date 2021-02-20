@@ -69,7 +69,13 @@ namespace SkillGrammar
         }
     }
 
-    public class Step
+    public class Component
+    /* Anything that can be displayed as a bubble in the component playground. */
+    {
+
+    }
+
+    public class Step : Component
     {
         public Operation operation;
         public NumericTarget numericTarget;
@@ -91,10 +97,14 @@ namespace SkillGrammar
             Number chance
         )
         {
-            if (operation != Operation.Add && operation != Operation.Subtract)
+            if (
+                operation.type != Operation.Type.Add
+                && operation.type != Operation.Type.Subtract
+            )
             {
                 throw new SkillGrammarException(
-                    $"A Step's Operation must be {Operation.Add} or {Operation.Add}."
+                    $"A Step's Operation must be {Operation.Type.Add}"
+                    + $" or {Operation.Type.Add}."
                 );
             }
             if (numericTarget.type != NumericTarget.Type.Health)
@@ -121,10 +131,14 @@ namespace SkillGrammar
             Number chance
         )
         {
-            if (operation != Operation.Add && operation != Operation.Subtract)
+            if (
+                operation.type != Operation.Type.Add
+                && operation.type != Operation.Type.Subtract
+            )
             {
                 throw new SkillGrammarException(
-                    $"A Step's Operation must be {Operation.Add} or {Operation.Add}."
+                    $"A Step's Operation must be {Operation.Type.Add}"
+                    + $" or {Operation.Type.Add}."
                 );
             }
 
@@ -136,7 +150,7 @@ namespace SkillGrammar
         }
     }
 
-    public class Numeric { }
+    public class Numeric : Component { }
 
     public class Number : Numeric
     {
@@ -205,7 +219,7 @@ namespace SkillGrammar
         }
     }
 
-    public class Condition
+    public class Condition : Component
     {
         public enum Type
         {
@@ -220,7 +234,7 @@ namespace SkillGrammar
         }
     }
 
-    public class Status
+    public class Status : Component
     {
         public enum Type { Stunned, Invulnerable, Invisible }
         public Operation operation;
@@ -233,11 +247,14 @@ namespace SkillGrammar
             Operation operation, NumericTarget numericTarget, Numeric anyAmount
         )
         {
-            if (operation != Operation.Add && operation != Operation.Subtract)
+            if (
+                operation.type != Operation.Type.Add
+                && operation.type != Operation.Type.Subtract
+            )
             {
                 throw new SkillGrammarException(
-                    $"An Status's Operation with anyAmount must be " +
-                    $"{Operation.Add} or {Operation.Add}."
+                    $"A Status's Operation with anyAmount must be " +
+                    $"{Operation.Type.Add} or {Operation.Type.Subtract}."
                 );
             }
 
@@ -261,11 +278,38 @@ namespace SkillGrammar
         }
     }
 
-    public enum Operation { Add, Subtract, Multiply }
+    public class Operation : Component
+    {
+        public enum Type { Add, Subtract, Multiply }
+        public Type type;
 
-    public enum DamageType { Physical, Fire, Earth, Water, Air }
+        public Operation(Type type)
+        {
+            this.type = type;
+        }
+    }
 
-    public enum DamageModifier { Piercing, HitsAllEnemies, HitsAllFighters }
+    public class DamageType : Component
+    {
+        public enum Type { Physical, Fire, Earth, Water, Air }
+        public Type type;
+
+        public DamageType(Type type)
+        {
+            this.type = type;
+        }
+    }
+
+    public class DamageModifier : Component
+    {
+        public enum Type { Piercing, HitsAllEnemies, HitsAllFighters }
+        public Type type;
+
+        public DamageModifier(Type type)
+        {
+            this.type = type;
+        }
+    }
 
     public class SkillGrammarException : Exception
     {

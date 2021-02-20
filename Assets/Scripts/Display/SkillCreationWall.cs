@@ -13,6 +13,7 @@ public class SkillCreationWall
     private float viewedAlpha = 0.16f;
 
     /* References. */
+    private SkillCreationState skillCreationState;
     private InterfightCameraView interfightCameraView;
     private Image backgroundImage;
     private InputField skillNameInput;
@@ -27,12 +28,11 @@ public class SkillCreationWall
 
     /* State. */
     private bool isHovered = false;
-    // `edited*` arefields of the skill being edited.
-    private string editedName;
-    private Sprite editedImage;
 
     void Awake()
     {
+        skillCreationState =
+            GameObject.Find("SkillCreationWall").GetComponent<SkillCreationState>();
         interfightCameraView =
             GameObject.Find("GeneralScripts").GetComponent<InterfightCameraView>();
         backgroundImage = transform.Find("TransparentBackground").GetComponent<Image>();
@@ -46,7 +46,9 @@ public class SkillCreationWall
         stepsContainerObj = transform.Find("EditedSkill/StepsContainer").gameObject;
 
         // Update the skill name variable when the user types.
-        skillNameInput.onValueChanged.AddListener(newValue => editedName = newValue);
+        skillNameInput.onValueChanged.AddListener(
+            newValue => skillCreationState.setEditedName(newValue)
+        );
     }
 
     void Start()
@@ -91,7 +93,7 @@ public class SkillCreationWall
             {
                 Sprite clickedImage = clickedObj.GetComponent<Image>().sprite;
 
-                editedImage = clickedImage;
+                skillCreationState.setEditedImage(clickedImage);
 
                 imageInputTextObj.SetActive(false);
                 imageInputImageObj.SetActive(true);
