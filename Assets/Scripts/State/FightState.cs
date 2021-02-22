@@ -67,7 +67,10 @@ public class FightState : MonoBehaviour
     void Awake()
     {
         hardCodeFightersAndSkills();
+    }
 
+    void Start()
+    {
         // Initiate the first fighter's turn.
         currentTurnIdx = fighterTurnOrder.Count - 1;
         goToNextFightersTurn();

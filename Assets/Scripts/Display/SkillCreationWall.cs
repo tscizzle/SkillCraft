@@ -22,6 +22,7 @@ public class SkillCreationWall
     private GameObject imageInputImageObj;
     private GameObject imageOptionsObj;
     private GameObject stepsContainerObj;
+    private Text editedComponentRootText;
 
     /* Parameters. */
     public List<Sprite> iconOptions; // populated in the Inspector
@@ -32,7 +33,7 @@ public class SkillCreationWall
     void Awake()
     {
         skillCreationState =
-            GameObject.Find("SkillCreationWall").GetComponent<SkillCreationState>();
+            GameObject.Find("SkillCreationCanvas").GetComponent<SkillCreationState>();
         interfightCameraView =
             GameObject.Find("GeneralScripts").GetComponent<InterfightCameraView>();
         backgroundImage = transform.Find("TransparentBackground").GetComponent<Image>();
@@ -44,11 +45,17 @@ public class SkillCreationWall
         imageOptionsObj =
             transform.Find("EditedSkill/ImageInput/ImageOptionsScrollView").gameObject;
         stepsContainerObj = transform.Find("EditedSkill/StepsContainer").gameObject;
+        editedComponentRootText = transform
+            .Find("ComponentPlayground/EditedComponentRoot/Text")
+            .GetComponent<Text>();
 
         // Update the skill name variable when the user types.
         skillNameInput.onValueChanged.AddListener(
             newValue => skillCreationState.setEditedName(newValue)
         );
+
+        // Update the display when certain state changes.
+        skillCreationState.addEditedComponentListener(updateEditedComponent);
     }
 
     void Start()
@@ -86,7 +93,20 @@ public class SkillCreationWall
             if (clickedObj == imageInputTextObj || clickedObj == imageInputImageObj)
             // Toggle the image options scroll view open or closed.
             {
-                imageOptionsObj.SetActive(!imageOptionsObj.activeSelf);
+                bool isOpening = !imageOptionsObj.activeSelf;
+                // Show the image options overlay.
+                imageOptionsObj.SetActive(isOpening);
+                // Update the button text (only visible if not image selected yet).
+                string text = isOpening ? "X" : "Select image...";
+                int fontSize = isOpening ? 50 : 24;
+                imageInputTextObj.GetComponent<Text>().text = text;
+                imageInputTextObj.GetComponent<Text>().fontSize = fontSize;
+                // Move the image options overlay to be top-level in the UI hierarchy,
+                // and last, so that it appears in front of the rest. (Doing this in
+                // script so in editor it can still be child of the appropriate object,
+                // and if that object moves around this one will follow accordingly.)
+                imageOptionsObj.transform.SetParent(transform);
+                imageOptionsObj.transform.SetAsLastSibling();
             }
             else if (clickedObj.name.Contains("ImageOption_"))
             // Select a new image for this skill.
@@ -107,24 +127,11 @@ public class SkillCreationWall
 
     /* Helpers. */
 
-    private void setBackgroundAlpha()
-    /* Set the transparency of the background that covers the whole canvas (keeping the
-    same RGB color it already was).
-    */
+    private void updateEditedComponent()
+    /* When the edited component is changed, update the component playground display. */
     {
-        CameraView currentView = interfightCameraView.currentView;
-
-        float alpha;
-        if (currentView == CameraView.Right)
-            alpha = viewedAlpha;
-        else if (currentView == CameraView.Start && isHovered)
-            alpha = hoveredAlpha;
-        else
-            alpha = 0;
-
-        Color color = backgroundImage.color;
-        color.a = alpha;
-        backgroundImage.color = color;
+        editedComponentRootText.text =
+            skillCreationState.editedComponent.GetType().Name;
     }
 
     private void populateImageOptions()
@@ -152,5 +159,25 @@ public class SkillCreationWall
             imageOptionObj.GetComponent<RectTransform>().localPosition = position;
             imageOptionObj.GetComponent<RectTransform>().localScale = Vector3.one;
         }
+    }
+
+    private void setBackgroundAlpha()
+    /* Set the transparency of the background that covers the whole canvas (keeping the
+    same RGB color it already was).
+    */
+    {
+        CameraView currentView = interfightCameraView.currentView;
+
+        float alpha;
+        if (currentView == CameraView.Right)
+            alpha = viewedAlpha;
+        else if (currentView == CameraView.Start && isHovered)
+            alpha = hoveredAlpha;
+        else
+            alpha = 0;
+
+        Color color = backgroundImage.color;
+        color.a = alpha;
+        backgroundImage.color = color;
     }
 }
