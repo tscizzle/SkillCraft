@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using SG = SkillGrammar;
 
 public class PrefabInstantiator : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class PrefabInstantiator : MonoBehaviour
     public GameObject skillButtonPrefab;
     public GameObject healthBarPrefab;
     public GameObject skillInfoPrefab;
+    public GameObject availableComponentPrefab;
 
     void Awake()
     {
@@ -94,5 +96,34 @@ public class PrefabInstantiator : MonoBehaviour
         skillInfoObj.transform.SetParent(parent);
 
         return skillInfoObj;
+    }
+
+    public GameObject CreateAvailableComponent(
+        SG.Component component, Transform parent = null
+    )
+    /*  */
+    {
+        GameObject availableComponentObj = Instantiate(
+            availableComponentPrefab, Vector3.zero, Quaternion.identity
+        );
+
+        AvailableComponent availableComponent =
+            availableComponentObj.GetComponent<AvailableComponent>();
+        availableComponent.component = component;
+
+        // The skill info is a UI object, so make it a child of Canvas.
+        parent = parent != null ? parent : canvasObj.transform;
+        availableComponentObj
+            .GetComponent<RectTransform>()
+            .transform.SetParent(parent);
+
+        // Set position and size.
+        Vector3 position =
+            availableComponentObj.GetComponent<RectTransform>().localPosition;
+        position.z = 0;
+        availableComponentObj.GetComponent<RectTransform>().localPosition = position;
+        availableComponentObj.GetComponent<RectTransform>().localScale = Vector3.one;
+
+        return availableComponentObj;
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using DG.Tweening;
+using SG = SkillGrammar;
 
 public class SkillCreationWall
     : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
@@ -23,6 +25,7 @@ public class SkillCreationWall
     private GameObject imageOptionsObj;
     private GameObject stepsContainerObj;
     private Text editedComponentRootText;
+    private GameObject availableComponentsContentObj;
 
     /* Parameters. */
     public List<Sprite> iconOptions; // populated in the Inspector
@@ -48,6 +51,8 @@ public class SkillCreationWall
         editedComponentRootText = transform
             .Find("ComponentPlayground/EditedComponentRoot/Text")
             .GetComponent<Text>();
+        availableComponentsContentObj = transform
+            .Find("AvailableComponents/ScrollView/Viewport/Content").gameObject;
 
         // Update the skill name variable when the user types.
         skillNameInput.onValueChanged.AddListener(
@@ -56,6 +61,7 @@ public class SkillCreationWall
 
         // Update the display when certain state changes.
         skillCreationState.addEditedComponentListener(updateEditedComponent);
+        skillCreationState.addAvailableComponentsListener(updateAvailableComponents);
     }
 
     void Start()
@@ -132,6 +138,40 @@ public class SkillCreationWall
     {
         editedComponentRootText.text =
             skillCreationState.editedComponent.GetType().Name;
+    }
+
+    private void updateAvailableComponents()
+    /* When an available component is added or removed, update the available components
+    list.
+    */
+    {
+        // Sync available components between what's displayed and what's in state:
+        // - Any in state and not displayed need to be added.
+        // - Any displayed and not in state need to be removed.
+        AvailableComponent[] displayedAvailableComponents =
+            availableComponentsContentObj.GetComponentsInChildren<AvailableComponent>();
+        List<int> displayedIds = displayedAvailableComponents.Select(
+            ac => ac.component.componentId
+        ).ToList();
+        foreach (AvailableComponent availableComponent in displayedAvailableComponents)
+        {
+            int componentId = availableComponent.component.componentId;
+            if (!skillCreationState.componentMap.ContainsKey(componentId))
+            {
+                Destroy(availableComponent);
+            }
+        }
+        foreach (KeyValuePair<int, SG.Component> kvp in skillCreationState.componentMap)
+        {
+            int componentId = kvp.Key;
+            SG.Component component = kvp.Value;
+            if (!displayedIds.Contains(componentId))
+            {
+                PrefabInstantiator.P.CreateAvailableComponent(
+                    component, availableComponentsContentObj.transform
+                );
+            }
+        }
     }
 
     private void populateImageOptions()

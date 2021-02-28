@@ -13,7 +13,7 @@ public class SkillCreationState : MonoBehaviour
     private int editedSkillId;
     private string editedName;
     private Sprite editedImage;
-    private Dictionary<int, SG.Component> componentMap
+    public Dictionary<int, SG.Component> componentMap
         = new Dictionary<int, SG.Component>();
     private int editedComponentId = -1;
     public SG.Component editedComponent
@@ -31,6 +31,8 @@ public class SkillCreationState : MonoBehaviour
     - Should be called only at the appropriate times, the appropriate number of times.
     */
     private Dictionary<int, Action> editedComponentListeners =
+        new Dictionary<int, Action>();
+    private Dictionary<int, Action> availableComponentsListeners =
         new Dictionary<int, Action>();
 
     void Awake()
@@ -71,19 +73,23 @@ public class SkillCreationState : MonoBehaviour
         foreach (Action listener in editedComponentListeners.Values) listener();
     }
 
-    public int createComponent(Type componentType, object[] args = null)
+    public int createComponent(Type componentType = null, SG.Component component = null)
     /* Create a skill component which can be used in constructing other components and
     ultimately a skill.
 
     :param Type componentType: One of the SG.Component types (e.g. Step, Status, etc.)
-    :param object[] args: Arguments to the constructor of componentType.
+    :param SG.Component component: If this is filled in 
 
     :return int componentId: Id of the component that was created.
     */
     {
-        SG.Component component =
-            (SG.Component)Activator.CreateInstance(componentType, args);
+        if (component == null)
+            component = (SG.Component)Activator.CreateInstance(componentType);
+
         componentMap[component.componentId] = component;
+
+        // Run available components listeners.
+        foreach (Action listener in availableComponentsListeners.Values) listener();
 
         return component.componentId;
     }
@@ -123,8 +129,44 @@ public class SkillCreationState : MonoBehaviour
         editedComponentListeners.Remove(listenerId);
     }
 
+    public int addAvailableComponentsListener(Action listener)
+    /*  Relevant state: `componentMap` */
+    {
+        int listenerId = previousListenerId + 1;
+        availableComponentsListeners.Add(listenerId, listener);
+        previousListenerId = listenerId;
+        return listenerId;
+    }
+
+    public void removeAvailableComponentsListener(int listenerId)
+    /*  Relevant state: `componentMap` */
+    {
+        availableComponentsListeners.Remove(listenerId);
+    }
+
     private void hardCodeAvailableComponents()
     {
-
+        createComponent(component: new SG.DamageType(SG.DamageType.Type.Physical));
+        createComponent(component: new SG.DamageType(SG.DamageType.Type.Water));
+        createComponent(
+            component: new SG.DamageModifier(SG.DamageModifier.Type.Piercing)
+        );
+        createComponent(component: new SG.Status(SG.Status.Type.Stunned));
+        createComponent(component: new SG.Operation(SG.Operation.Type.Add));
+        createComponent(component: new SG.Operation(SG.Operation.Type.Add));
+        createComponent(component: new SG.Operation(SG.Operation.Type.Subtract));
+        createComponent(component: new SG.Operation(SG.Operation.Type.Multiply));
+        createComponent(component: new SG.Condition(SG.Condition.Type.AtFullHeath));
+        createComponent(
+            component: new SG.NumericTarget(SG.NumericTarget.Type.FireResistance)
+        );
+        createComponent(
+            component: new SG.NumericTarget(SG.NumericTarget.Type.WaterResistance)
+        );
+        createComponent(component: new SG.SmallNumber(1));
+        createComponent(component: new SG.SmallNumber(1.2f));
+        createComponent(component: new SG.LargeNumber(6));
+        createComponent(component: new SG.LargeNumber(7));
+        createComponent(component: new SG.LargeNumber(10));
     }
 }

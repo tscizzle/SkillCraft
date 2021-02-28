@@ -46,8 +46,8 @@ using UnityEngine;
     -> "invulnerable" (can't lose health)
     -> "invisible" (can't be the specific target of a skill, though attacks that hit many fighters can still hit)
     -> {any other hard-coded things, can be creative, take away actions, etc.}
-    -> (["add"|"subtract"], <NumericTarget>, <Numeric>) (e.g. subtract from base fire resistance 10%)
-    -> (<Operation>, <NumericTarget>, <SmallNumber>) (e.g. multiply base fire resistance by 4)
+    -> (["add"|"subtract"], <NumericTarget>, <Number>) (e.g. subtract from base fire resistance 10%)
+    -> (<Operation>, <NumericTarget>, <SmallNumber>) (e.g. multiply base fire resistance by 4, NEED CONSTRAINT HERE e.g. can't multiply health)
 <DamageType>
     LEAF
     -> "physical"
@@ -85,7 +85,7 @@ namespace SkillGrammar
         }
     }
 
-    public class Component
+    public abstract class Component
     /* Anything that can be displayed as a bubble in the component playground. */
     {
         /* Class-wide state. */
@@ -108,6 +108,10 @@ namespace SkillGrammar
 
             previousComponentId = this.componentId;
         }
+
+        /* PUBLIC API. */
+
+        public abstract string getName();
     }
 
     public class Step : Component
@@ -182,9 +186,14 @@ namespace SkillGrammar
         public SmallNumber turns;
         public Condition condition;
         public Number chance = new LargeNumber(100);
+
+        public override string getName()
+        {
+            return "Step";
+        }
     }
 
-    public class Numeric : Component { }
+    public abstract class Numeric : Component { }
 
     public class Number : Numeric
     {
@@ -203,6 +212,11 @@ namespace SkillGrammar
             }
             this.value = value;
         }
+
+        public override string getName()
+        {
+            return $"{value}";
+        }
     }
 
     public class SmallNumber : Number
@@ -211,6 +225,11 @@ namespace SkillGrammar
         public override float maxVal { get { return 6; } }
 
         public SmallNumber(float value) : base(value) { }
+
+        public override string getName()
+        {
+            return $"{value} (small)";
+        }
     }
 
     public class LargeNumber : Number
@@ -219,6 +238,11 @@ namespace SkillGrammar
         public override float maxVal { get { return 101; } }
 
         public LargeNumber(float value) : base(value) { }
+
+        public override string getName()
+        {
+            return $"{value} (large)";
+        }
     }
 
     public class NumericTarget : Numeric
@@ -238,6 +262,11 @@ namespace SkillGrammar
         public NumericTarget(Type type)
         {
             this.type = type;
+        }
+
+        public override string getName()
+        {
+            return $"{type}";
         }
     }
 
@@ -261,6 +290,11 @@ namespace SkillGrammar
 
         public Number number;
         public NumericTarget numericTarget;
+
+        public override string getName()
+        {
+            return $"{numericTarget.getName()} + {number.value}";
+        }
     }
 
     public class Condition : Component
@@ -281,19 +315,27 @@ namespace SkillGrammar
         {
             this.type = Type.HasStatus;
         }
+
+        public override string getName()
+        {
+            if (status != null)
+                return $"if {type} {status.getName()}";
+            else
+                return $"if {type}";
+        }
     }
 
     public class Status : Component
     {
-        public enum Type { Stunned, Invulnerable, Invisible }
+        public enum Type { Stunned, Invulnerable, Invisible, Custom }
         public Operation operation;
         public NumericTarget numericTarget;
-        public Numeric anyAmount;
+        public Number anyAmount;
         public SmallNumber smallAmount;
         public Type type;
 
         public Status(
-            Operation operation, NumericTarget numericTarget, Numeric anyAmount
+            Operation operation, NumericTarget numericTarget, Number anyAmount
         )
         {
             if (
@@ -310,6 +352,7 @@ namespace SkillGrammar
             this.operation = operation;
             this.numericTarget = numericTarget;
             this.anyAmount = anyAmount;
+            this.type = Type.Custom;
         }
 
         public Status(
@@ -325,6 +368,19 @@ namespace SkillGrammar
         {
             this.type = type;
         }
+
+        public override string getName()
+        {
+            if (type == Type.Custom)
+            {
+                Number amount = smallAmount != null ? smallAmount : anyAmount;
+                return $"{type} status: {operation} {amount.value} to {numericTarget}";
+            }
+            else
+            {
+                return $"{type}";
+            }
+        }
     }
 
     public class Operation : Component
@@ -335,6 +391,11 @@ namespace SkillGrammar
         public Operation(Type type)
         {
             this.type = type;
+        }
+
+        public override string getName()
+        {
+            return $"{type}";
         }
     }
 
@@ -347,6 +408,11 @@ namespace SkillGrammar
         {
             this.type = type;
         }
+
+        public override string getName()
+        {
+            return $"{type}";
+        }
     }
 
     public class DamageModifier : Component
@@ -357,6 +423,11 @@ namespace SkillGrammar
         public DamageModifier(Type type)
         {
             this.type = type;
+        }
+
+        public override string getName()
+        {
+            return $"{type}";
         }
     }
 
