@@ -18,6 +18,7 @@ public class PrefabInstantiator : MonoBehaviour
     public GameObject skillButtonPrefab;
     public GameObject healthBarPrefab;
     public GameObject skillInfoPrefab;
+    public GameObject constructionOptionPrefab;
     public GameObject availableComponentPrefab;
 
     void Awake()
@@ -98,10 +99,52 @@ public class PrefabInstantiator : MonoBehaviour
         return skillInfoObj;
     }
 
+    public GameObject CreateConstructionOption(
+        string optionKey, Transform parent = null
+    )
+    /* Create a display for one of the options of how to construct a component.
+
+    :param string optionKey: What is this construction option called.
+    :param Transform parent: If supplied, make this object a child of `parent`.
+    
+    :returns GameObject constructionOptionObj:
+    */
+    {
+        GameObject constructionOptionObj = Instantiate(
+            constructionOptionPrefab, Vector3.zero, Quaternion.identity
+        );
+
+        ConstructionOption constructionOption =
+            constructionOptionObj.GetComponent<ConstructionOption>();
+        constructionOption.optionKey = optionKey;
+
+        // The construction option is a UI object, so make it a child of Canvas.
+        parent = parent != null ? parent : canvasObj.transform;
+        constructionOptionObj
+            .GetComponent<RectTransform>()
+            .transform.SetParent(parent);
+
+        // Set position and size.
+        Vector3 position =
+            constructionOptionObj.GetComponent<RectTransform>().localPosition;
+        position.z = 0;
+        constructionOptionObj.GetComponent<RectTransform>().localPosition = position;
+        constructionOptionObj.GetComponent<RectTransform>().localScale = Vector3.one;
+
+        return constructionOptionObj;
+    }
+
     public GameObject CreateAvailableComponent(
         SG.Component component, Transform parent = null
     )
-    /*  */
+    /* Create a display for a skill grammar component that is available to use within a
+    skill somehow.
+
+    :param SG.Component component: Which skill grammar component this display is about.
+    :param Transform parent: If supplied, make this object a child of `parent`.
+    
+    :returns GameObject availableComponentObj:
+    */
     {
         GameObject availableComponentObj = Instantiate(
             availableComponentPrefab, Vector3.zero, Quaternion.identity
@@ -111,7 +154,7 @@ public class PrefabInstantiator : MonoBehaviour
             availableComponentObj.GetComponent<AvailableComponent>();
         availableComponent.component = component;
 
-        // The skill info is a UI object, so make it a child of Canvas.
+        // The available component is a UI object, so make it a child of Canvas.
         parent = parent != null ? parent : canvasObj.transform;
         availableComponentObj
             .GetComponent<RectTransform>()

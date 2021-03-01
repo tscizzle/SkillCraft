@@ -73,6 +73,14 @@ public class SkillCreationState : MonoBehaviour
         foreach (Action listener in editedComponentListeners.Values) listener();
     }
 
+    public void setSelectedConstruction(string optionKey)
+    {
+        if (editedComponent != null)
+        {
+            editedComponent.setSelectedConstruction(optionKey);
+        }
+    }
+
     public int createComponent(Type componentType = null, SG.Component component = null)
     /* Create a skill component which can be used in constructing other components and
     ultimately a skill.

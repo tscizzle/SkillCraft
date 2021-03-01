@@ -101,6 +101,7 @@ namespace SkillGrammar
 
         /* State. */
         public string selectedConstruction;
+        public int parentComponentId;
 
         public Component()
         {
@@ -111,7 +112,29 @@ namespace SkillGrammar
 
         /* PUBLIC API. */
 
-        public abstract string getName();
+        public abstract string getLabel();
+
+        public void setSelectedConstruction(string optionKey)
+        /* Choose a construction for a given component (determines the structure for a
+        component which can be built different ways, with different types of
+        subcomponents).
+
+        :param string optionKey: Key into dict of options this component has for
+            constructions.
+        */
+        {
+            if (constructionOptions == null)
+                throw new SkillGrammarException(
+                    $"Can't select {optionKey} option on {this.GetType().Name} which "
+                    + "has no construction options."
+                );
+            if (!constructionOptions.ContainsKey(optionKey))
+                throw new SkillGrammarException(
+                    $"{optionKey} is not a construction option for "
+                    + $"{this.GetType().Name}."
+                );
+            selectedConstruction = optionKey;
+        }
     }
 
     public class Step : Component
@@ -187,9 +210,19 @@ namespace SkillGrammar
         public Condition condition;
         public Number chance = new LargeNumber(100);
 
-        public override string getName()
+        public Step()
         {
-            return "Step";
+            this.selectedConstruction = "Damage";
+        }
+
+        public override string getLabel()
+        {
+            string label = "Step";
+            if (selectedConstruction == "Damage")
+                label = "Do Damage";
+            else if (selectedConstruction == "Status")
+                label = "Apply Status";
+            return label;
         }
     }
 
@@ -213,7 +246,7 @@ namespace SkillGrammar
             this.value = value;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{value}";
         }
@@ -226,7 +259,7 @@ namespace SkillGrammar
 
         public SmallNumber(float value) : base(value) { }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{value} (small)";
         }
@@ -239,7 +272,7 @@ namespace SkillGrammar
 
         public LargeNumber(float value) : base(value) { }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{value} (large)";
         }
@@ -264,7 +297,7 @@ namespace SkillGrammar
             this.type = type;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{type}";
         }
@@ -291,9 +324,9 @@ namespace SkillGrammar
         public Number number;
         public NumericTarget numericTarget;
 
-        public override string getName()
+        public override string getLabel()
         {
-            return $"{numericTarget.getName()} + {number.value}";
+            return $"{numericTarget.getLabel()} + {number.value}";
         }
     }
 
@@ -316,10 +349,10 @@ namespace SkillGrammar
             this.type = Type.HasStatus;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             if (status != null)
-                return $"if {type} {status.getName()}";
+                return $"if {type} {status.getLabel()}";
             else
                 return $"if {type}";
         }
@@ -369,7 +402,7 @@ namespace SkillGrammar
             this.type = type;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             if (type == Type.Custom)
             {
@@ -393,7 +426,7 @@ namespace SkillGrammar
             this.type = type;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{type}";
         }
@@ -409,7 +442,7 @@ namespace SkillGrammar
             this.type = type;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{type}";
         }
@@ -425,7 +458,7 @@ namespace SkillGrammar
             this.type = type;
         }
 
-        public override string getName()
+        public override string getLabel()
         {
             return $"{type}";
         }

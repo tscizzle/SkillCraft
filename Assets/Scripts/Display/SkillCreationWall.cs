@@ -24,6 +24,7 @@ public class SkillCreationWall
     private GameObject imageInputImageObj;
     private GameObject imageOptionsObj;
     private GameObject stepsContainerObj;
+    private GameObject constructionOptionsObj;
     private Text editedComponentRootText;
     private GameObject availableComponentsContentObj;
 
@@ -48,6 +49,8 @@ public class SkillCreationWall
         imageOptionsObj =
             transform.Find("EditedSkill/ImageInput/ImageOptionsScrollView").gameObject;
         stepsContainerObj = transform.Find("EditedSkill/StepsContainer").gameObject;
+        constructionOptionsObj =
+            transform.Find("ComponentPlayground/ConstructionOptions").gameObject;
         editedComponentRootText = transform
             .Find("ComponentPlayground/EditedComponentRoot/Text")
             .GetComponent<Text>();
@@ -136,8 +139,27 @@ public class SkillCreationWall
     private void updateEditedComponent()
     /* When the edited component is changed, update the component playground display. */
     {
+        // Clear out previous construction options and create the correct new ones.
+        foreach (Transform child in constructionOptionsObj.transform)
+            Destroy(child.gameObject);
+        if (skillCreationState.editedComponent != null)
+        {
+            List<string> constructionOptionKeys =
+                skillCreationState.editedComponent.constructionOptions.Keys.ToList();
+            foreach (string optionKey in constructionOptionKeys)
+                PrefabInstantiator.P.CreateConstructionOption(
+                    optionKey, constructionOptionsObj.transform
+                );
+        }
+
+        // Display the type of component being edited.
         editedComponentRootText.text =
             skillCreationState.editedComponent.GetType().Name;
+
+        // TODO: if component has a parent, display a "zoom out 1 level" button to the left
+
+        // TODO: display the subcomponents beneath the root, based on the type of
+        //  component and the selectedConstruction
     }
 
     private void updateAvailableComponents()
@@ -165,6 +187,8 @@ public class SkillCreationWall
         {
             int componentId = kvp.Key;
             SG.Component component = kvp.Value;
+            if (!isComponentAvailable(component))
+                continue;
             if (!displayedIds.Contains(componentId))
             {
                 PrefabInstantiator.P.CreateAvailableComponent(
@@ -219,5 +243,16 @@ public class SkillCreationWall
         Color color = backgroundImage.color;
         color.a = alpha;
         backgroundImage.color = color;
+    }
+    private bool isComponentAvailable(SG.Component component)
+    {
+        bool isAvailable = true;
+
+        // Consider Step components unavailable for use in other components, since they
+        // are the outermost component type (besides skills themselves).
+        if (component.GetType() == typeof(SG.Step))
+            isAvailable = false;
+
+        return isAvailable;
     }
 }

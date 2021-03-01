@@ -10,11 +10,13 @@ public class AvailableComponent : MonoBehaviour
     public SG.Component component;
 
     /* References. */
-    private Text componentNameText;
+    private CanvasGroup canvasGroup;
+    private Text labelText;
 
     void Awake()
     {
-        componentNameText = transform.Find("Text").GetComponent<Text>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        labelText = transform.Find("Text").GetComponent<Text>();
     }
 
     void Start()
@@ -24,6 +26,8 @@ public class AvailableComponent : MonoBehaviour
 
     void Update()
     {
-        componentNameText.text = component.getName();
+        labelText.text = component.getLabel();
+
+        canvasGroup.alpha = component.isAvailable ? 0.9f : 0.6f;
     }
 }
