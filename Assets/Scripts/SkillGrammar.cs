@@ -101,7 +101,7 @@ namespace SkillGrammar
 
         /* State. */
         public string selectedConstruction;
-        public int parentComponentId;
+        public int parentComponentId = -1;
 
         public Component()
         {

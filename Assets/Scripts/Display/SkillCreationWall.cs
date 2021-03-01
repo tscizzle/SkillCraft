@@ -187,8 +187,11 @@ public class SkillCreationWall
         {
             int componentId = kvp.Key;
             SG.Component component = kvp.Value;
-            if (!isComponentAvailable(component))
+
+            // We don't show every component.
+            if (!doDisplayComponent(component))
                 continue;
+
             if (!displayedIds.Contains(componentId))
             {
                 PrefabInstantiator.P.CreateAvailableComponent(
@@ -244,15 +247,22 @@ public class SkillCreationWall
         color.a = alpha;
         backgroundImage.color = color;
     }
-    private bool isComponentAvailable(SG.Component component)
+    private bool doDisplayComponent(SG.Component component)
+    /* Determine whether or not this component should be shown in the available
+    components list.
+    
+    :param SG.Component component:
+
+    :return bool:
+    */
     {
-        bool isAvailable = true;
+        bool doDisplay = true;
 
-        // Consider Step components unavailable for use in other components, since they
-        // are the outermost component type (besides skills themselves).
+        // Don't show Step components in the available components list, since they are
+        // the outermost component type (besides skills themselves).
         if (component.GetType() == typeof(SG.Step))
-            isAvailable = false;
+            doDisplay = false;
 
-        return isAvailable;
+        return doDisplay;
     }
 }
